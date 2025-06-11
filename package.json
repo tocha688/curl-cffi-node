@@ -1,0 +1,56 @@
+{
+  "name": "curl-cffi-node",
+  "version": "0.0.1",
+  "description": "Node.js libcurl bindings using koffi with browser fingerprint capabilities",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "scripts/install.cjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "prepublishOnly": "npm run build",
+    "install": "node scripts/install.cjs"
+  },
+  "keywords": [
+    "curl",
+    "http",
+    "libcurl",
+    "curl-impersonate",
+    "fingerprint",
+    "browser-fingerprint",
+    "http-client",
+    "web-scraping",
+    "ja3",
+    "tls",
+    "http2"
+  ],
+  "author": {
+    "name": "tocha688",
+    "url": "https://github.com/tocha688"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@10.6.5",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tar": "^7.4.3",
+    "tsup": "^8.5.0"
+  },
+  "dependencies": {
+    "@tocha688/libcurl": "^0.0.2",
+    "@types/lodash": "^4.17.17",
+    "lodash": "^4.17.21",
+    "tough-cookie": "^5.1.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
