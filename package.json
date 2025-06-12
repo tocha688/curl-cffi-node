@@ -43,7 +43,7 @@
     "tsup": "^8.5.0"
   },
   "dependencies": {
-    "@tocha688/libcurl": "^0.0.2",
+    "@tocha688/libcurl": "link:..\\curl-impersonate",
     "@types/lodash": "^4.17.17",
     "lodash": "^4.17.21",
     "tough-cookie": "^5.1.2"

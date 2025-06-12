@@ -55,3 +55,6 @@ export function parseResponseHeaders(str: string) {
     return headers;
 }
 
+export async function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
