@@ -35,19 +35,22 @@ export class CurlMultiEvent extends CurlMulti {
     constructor() {
         super();
         this.setupCallbacks();
-        this.startForceTimeout();
+        // this.startForceTimeout();
     }
 
+    private isStartLoopCheck = false;
     private startForceTimeout(): void {
+        if (this.isStartLoopCheck || this.closed || this.curls.size < 1) return
+        this.isStartLoopCheck = true;
+        const close = () => {
+            this.isStartLoopCheck = false;
+        }
         const forceTimeout = () => {
-            if (this.closed) return;
-
+            if (this.closed || this.curls.size < 1) return close();
             // 强制处理超时，确保请求不会卡住
             this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
-
             this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
         };
-
         this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
     }
 
@@ -168,10 +171,10 @@ export class CurlMultiEvent extends CurlMulti {
             this.addHandle(curl);
             // this.performSocketAction(CURL_SOCKET_TIMEOUT, 0);
             // 立即触发一次socket action来启动请求
+            this.startForceTimeout();
             setImmediate(() => {
-                if (!this.closed) {
-                    this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
-                }
+                if (this.closed) return;
+                this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
             });
         });
     }
@@ -184,7 +187,6 @@ export class CurlMultiEvent extends CurlMulti {
             clearTimeout(this.forceTimeoutTimer);
             this.forceTimeoutTimer = null;
         }
-
         super.close();
         //清理事件
         this.sockfds.forEach((sockfd) => {

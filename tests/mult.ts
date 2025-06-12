@@ -5,30 +5,31 @@ import { CookieJar } from "tough-cookie";
 
 const cps = new CurlMultiEvent()
 const watis = [] as Array<Promise<any>>;
-watis.push(cps.request({
-    url: 'https://tls.peet.ws/api/all',
-}).then(res => {
-    console.log("请求成功 111",res.statusCode);
-}).catch(err => {
-    console.log("请求错误", err.message)
-}))
+// watis.push(cps.request({
+//     url: 'https://tls.peet.ws/api/all',
+// }).then(res => {
+//     console.log("请求成功 111",res.statusCode);
+// }).catch(err => {
+//     console.log("请求错误", err.message)
+// }))
+
+// watis.push(cps.request({
+//     url: 'https://tls.peet.ws/api/all',
+// }).then(res => {
+//     console.log("请求成功 222",res.statusCode);
+// }).catch(err => {
+//     console.log("请求错误", err.message)
+// }))
 
 watis.push(cps.request({
-    url: 'https://tls.peet.ws/api/all',
-}).then(res => {
-    console.log("请求成功 222",res.statusCode);
-}).catch(err => {
-    console.log("请求错误", err.message)
-}))
-
-watis.push(cps.request({
-   url: 'https://www.google.com',
+   url: 'https://google.com',
     method: 'GET',
     impersonate: 'chrome136',
     headers: {
         "Content-type": "application/json",
     },
-    defaultHeaders: false,
+    // defaultHeaders: false,
+    allowRedirects:false,
     // verify: false,
     // jar: new CookieJar(),
     proxy:"http://127.0.0.1:10808",
