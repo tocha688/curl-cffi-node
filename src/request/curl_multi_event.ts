@@ -25,7 +25,7 @@ type CurlData = {
     resolve: (res?: CurlResponse) => void;
     reject: (err?: Error) => void;
 }
-export class CurlPools extends CurlMulti {
+export class CurlMultiEvent extends CurlMulti {
     private forceTimeoutTimer: NodeJS.Timeout | null = null;
     private timers: Array<NodeJS.Timeout> = [];
     curls: Map<string, CurlData> = new Map();
@@ -110,6 +110,7 @@ export class CurlPools extends CurlMulti {
             }
         });
     }
+
     private processData(sockfd: number, evBitmask: number): void {
         console.log(`处理数据: sockfd=${sockfd}, evBitmask=${evBitmask}`);
         if (this.closed) return;
@@ -123,26 +124,34 @@ export class CurlPools extends CurlMulti {
         }
     }
 
+    private isCecker = false;
     private checkProcess() {
-        while (true) {
-            const msg = this.infoRead();
-            if (!msg) {
-                break;
-            }
-            console.log('获取到消息', msg);
-            if (msg.msg === CURLMSG_DONE) {
-                const call = this.curls.get(msg.easyId);
-                if (!call || !msg.data) continue;
-                this.curls.delete(msg.easyId);
-                if (msg.data.result == 0) {
-                    call.resolve(parseResponse(call.curl, call.options));
-                } else {
-                    call.reject(new Error(call.curl.error(msg.data.result)));
+        if (this.isCecker) return;
+        try {
+            while (true) {
+                const msg = this.infoRead();
+                if (!msg) {
+                    break;
                 }
-                call.curl.close();
-            } else {
-                console.log(`NOT DONE`);
+                console.log('获取到消息', msg);
+                if (msg.msg === CURLMSG_DONE) {
+                    const call = this.curls.get(msg.easyId);
+                    if (!call || !msg.data) continue;
+                    this.curls.delete(msg.easyId);
+                    if (msg.data.result == 0) {
+                        call.resolve(parseResponse(call.curl, call.options));
+                    } else {
+                        call.reject(new Error(call.curl.error(msg.data.result)));
+                    }
+                    call.curl.close();
+                } else {
+                    console.log(`NOT DONE`);
+                }
             }
+        } catch (e) {
+            console.error('处理完成消息时出错:', e);
+        } finally {
+            this.isCecker = false;
         }
     }
 

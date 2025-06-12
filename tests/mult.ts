@@ -1,17 +1,17 @@
 import { Curl } from "@tocha688/libcurl"
-import { CurlMultiTimer } from "../src"
+import { CurlMultiTimer,CurlMultiEvent } from "../src"
 import { CookieJar } from "tough-cookie";
 
 
-const cps = new CurlMultiTimer()
+const cps = new CurlMultiEvent()
 const watis = [] as Array<Promise<any>>;
-// watis.push(cps.request({
-//     url: 'https://tls.peet.ws/api/all',
-// }).then(res => {
-//     console.log("请求成功 111",res.statusCode);
-// }).catch(err => {
-//     console.log("请求错误", err.message)
-// }))
+watis.push(cps.request({
+    url: 'https://tls.peet.ws/api/all',
+}).then(res => {
+    console.log("请求成功 111",res.statusCode);
+}).catch(err => {
+    console.log("请求错误", err.message)
+}))
 
 watis.push(cps.request({
     url: 'https://tls.peet.ws/api/all',
