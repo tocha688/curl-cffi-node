@@ -1,5 +1,5 @@
 import { Curl, CurlInfo } from "@tocha688/libcurl";
-import { CurlRequest, RequestOptions } from "./request";
+import { CurlRequestInfo, RequestOptions } from "./request";
 import { parseCurlCookies, getCookieUrl } from "../utils";
 import { HttpHeaders } from "./header";
 import { CookieJar } from "tough-cookie";
@@ -7,9 +7,9 @@ import { CookieJar } from "tough-cookie";
 export type CurlResponseOptions = {
     headers: HttpHeaders;
     dataRaw?: Buffer;
-    request: CurlRequest;
+    request: CurlRequestInfo;
     url: string;
-    stacks?: Array<CurlRequest>;
+    stacks?: Array<CurlRequestInfo>;
     options: RequestOptions;
     index?: number;
 }
@@ -19,9 +19,9 @@ export class CurlResponse {
     statusCode: number;
     dataRaw?: Buffer;
     headers: HttpHeaders;
-    request: CurlRequest;
+    request: CurlRequestInfo;
     options: RequestOptions;
-    stacks: Array<CurlRequest> = [];
+    stacks: Array<CurlRequestInfo> = [];
     index: number = 0;
     redirects: number = 0;
 

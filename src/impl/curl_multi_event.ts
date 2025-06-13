@@ -22,7 +22,7 @@ const CURLMSG_DONE = 1
 type CurlData = {
     curl: Curl;
     options: RequestOptions;
-    resolve: (res?: CurlResponse) => void;
+    resolve: (res: CurlResponse | PromiseLike<CurlResponse>) => void;
     reject: (err?: Error) => void;
 }
 export class CurlMultiEvent extends CurlMulti {
@@ -158,7 +158,7 @@ export class CurlMultiEvent extends CurlMulti {
         }
     }
 
-    async request(ops: RequestOptions): Promise<any> {
+    async request(ops: RequestOptions): Promise<CurlResponse> {
         return new Promise((resolve, reject) => {
             const curl = new Curl();
             setRequestOptions(curl, ops);

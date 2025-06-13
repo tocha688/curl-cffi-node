@@ -1,5 +1,9 @@
+import { curlGlobalInit } from "../impl";
+import { CurlRequest } from "./request";
 
+export * from "./request";
+export * from "./session";
 
-export * from './request_sync';
-export * from './curl_multi_event';
-export * from './curl_multi_timer';
+curlGlobalInit();
+export const req = new CurlRequest();
+

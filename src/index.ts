@@ -1,9 +1,8 @@
-import { globalInit, setLibPath } from "@tocha688/libcurl"
-import { getLibPath } from "./app"
+import { curlGlobalInit } from "./impl";
 
-setLibPath(getLibPath())
-globalInit(3);
+curlGlobalInit();
 
 export * from "@tocha688/libcurl";
 export * from "./type";
 export * from "./request";
+
