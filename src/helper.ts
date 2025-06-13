@@ -183,7 +183,7 @@ export function parseResponse(curl: Curl, req: RequestOptions) {
             stacks,
             index: stacks.length,
         })
-        res.redirects = stacks.length - 1;
+        res.redirects = Math.max(0, stacks.length - 1);
         treq.response = res;
         let loction = res.headers.first('location')
         if (loction) {
@@ -201,6 +201,6 @@ export function parseResponse(curl: Curl, req: RequestOptions) {
         }
         stacks.push(treq)
     })
-    return stacks[stacks.length > 0 ? stacks.length - 1 : 0].response as CurlResponse;
+    return stacks[Math.max(stacks.length - 1, 0)].response as CurlResponse;
 }
 

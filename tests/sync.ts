@@ -3,24 +3,26 @@ import { CurlClientSync } from "../src"
 
 const req = new CurlClientSync();
 req.request({
-    url: 'https://postman-echo.com/post',
+    // url: 'https://postman-echo.com/post',
     // url: 'https://tls.peet.ws/api/all',
-    method: 'POST',
+    url: "http://google.com",
+    method: 'GET',
     impersonate: 'chrome136',
-    headers: {
-        "Content-type": "application/json",
-    },
-    data: {
-        "name": "curl-cffi-node",
-        "version": "0.0.1",
-    },
-    defaultHeaders: false,
+    // headers: {
+    //     "Content-type": "application/json",
+    // },
+    // data: {
+    //     "name": "curl-cffi-node",
+    //     "version": "0.0.1",
+    // },
+    // defaultHeaders: false,
     verify: false,
+    allowRedirects: false,
     // jar: new CookieJar(),
     // proxy: "http://127.0.0.1:10808",
-}).then(res=>{
+}).then(res => {
     console.log(res.status);
-    console.log(res.text);
+    console.log(res.redirects);
     console.log(JSON.stringify(res.jar?.serializeSync()));
 })
 
