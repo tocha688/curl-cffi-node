@@ -10,7 +10,7 @@ export class CurlSesionSync extends CurlClientSync {
     constructor(ops?: RequestOptions) {
         super({
             ...ops,
-            jar: new CookieJar()
+            jar: ops?.jar ?? new CookieJar()
         });
     }
 }
