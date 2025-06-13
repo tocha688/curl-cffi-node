@@ -79,7 +79,7 @@ jobs:
           name: dist
           path: dist/
           
-      - run: pnpm install --frozen-lockfile --prod
+      - run: pnpm install --frozen-lockfile
       
       - name: Update package.json version
         run: |
