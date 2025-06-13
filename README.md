@@ -42,7 +42,9 @@ const { req } = require('curl-cffi');
 // Asynchronous request
 async function makeGetRequest() {
   try {
-    const response = await req.get('https://api.example.com/data');
+    const response = await req.get('https://api.example.com/data', {
+      impersonate: 'chrome136' // Simulate Chrome 136
+    });
     console.log('Status Code:', response.statusCode);
     console.log('Response Data:', response.data);
   } catch (error) {

@@ -42,7 +42,9 @@ const { req } = require('curl-cffi');
 // 异步请求
 async function makeGetRequest() {
   try {
-    const response = await req.get('https://api.example.com/data');
+    const response = await req.get('https://api.example.com/data', {
+      impersonate: 'chrome136' // 模拟 Chrome 136
+    });
     console.log('状态码:', response.statusCode);
     console.log('响应数据:', response.data);
   } catch (error) {
