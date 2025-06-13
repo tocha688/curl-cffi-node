@@ -1,7 +1,7 @@
 {
   "name": "curl-cffi",
   "version": "0.1.1",
-  "description": "Node.js libcurl bindings using koffi with browser fingerprint capabilities",
+  "description": "A powerful HTTP client for Node.js based on libcurl with browser fingerprinting capabilities.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
