@@ -34,6 +34,7 @@
     "curl",
     "http",
     "libcurl",
+    "curl-cffi",
     "curl-impersonate",
     "fingerprint",
     "browser-fingerprint",
@@ -56,7 +57,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@tocha688/libcurl": "link:..\\curl-impersonate",
+    "@tocha688/libcurl": "^0.0.3",
     "@types/lodash": "^4.17.17",
     "lodash": "^4.17.21",
     "tough-cookie": "^5.1.2"
