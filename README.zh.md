@@ -2,7 +2,7 @@
 
 基于 libcurl 的强大 Node.js HTTP 客户端，具备浏览器指纹识别功能。
 
-[English](README.md) | [中文](#chinese)
+[English](https://github.com/tocha688/curl-cffi-node/blob/main/README.md) | [中文](https://github.com/tocha688/curl-cffi-node/blob/main/README.zh.md)
 
 <a name="chinese"></a>
 
