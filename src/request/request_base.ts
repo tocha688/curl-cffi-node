@@ -81,6 +81,10 @@ export class CurlRequestImplBase {
 
 export class CurlRequestBase extends CurlRequestImplBase {
     private multi?: CurlMultiEvent | CurlMultiTimer;
+    constructor(ops?: RequestOptions) {
+        super(ops);
+        this.multi =ops?.impl;
+    }
     async request(options: RequestOptions): Promise<CurlResponse> {
         if (this.multi) {
             return this.multi.request(options);
