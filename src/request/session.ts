@@ -6,7 +6,7 @@ import { CurlClient, CurlClientLoop, CurlClientSync } from "./request";
 
 
 //同步方法
-export class CurlSesionSync extends CurlClientSync {
+export class CurlSessionSync extends CurlClientSync {
     constructor(ops?: RequestOptions) {
         super({
             ...ops,
