@@ -2,7 +2,7 @@
 
 A powerful HTTP client for Node.js based on libcurl with browser fingerprinting capabilities.
 
-[English](#english) | [中文](#chinese)
+[English](https://github.com/tocha688/curl-cffi-node/blob/main/README.md) | [中文](https://github.com/tocha688/curl-cffi-node/blob/main/README.zh.md)
 
 <a name="english"></a>
 
