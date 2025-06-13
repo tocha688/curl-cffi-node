@@ -16,7 +16,7 @@ export type CurlResponseOptions = {
 
 export class CurlResponse {
     url: string;
-    statusCode: number;
+    status: number;
     dataRaw?: Buffer;
     headers: HttpHeaders;
     request: CurlRequestInfo;
@@ -28,7 +28,7 @@ export class CurlResponse {
     constructor(opts: CurlResponseOptions) {
         this.url = opts.url ?? opts.request?.url ?? '';
         this.request = opts.request;
-        this.statusCode = opts.headers.status;
+        this.status = opts.headers.status;
         this.dataRaw = opts.dataRaw;
         this.headers = opts.headers;
         this.stacks = opts.stacks || [];

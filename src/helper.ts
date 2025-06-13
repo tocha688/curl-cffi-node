@@ -162,7 +162,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
 
 export function parseResponse(curl: Curl, req: RequestOptions) {
     // const url = curl.getInfoString(CurlInfo.EffectiveUrl) || req.url;
-    // const statusCode = curl.getInfoNumber(CurlInfo.ResponseCode);
+    // const status = curl.getInfoNumber(CurlInfo.ResponseCode);
     const dataRaw = Buffer.from(curl.getRespBody());
     const headerRaw = Buffer.from(curl.getRespHeaders()).toString('utf-8');
     //堆栈
