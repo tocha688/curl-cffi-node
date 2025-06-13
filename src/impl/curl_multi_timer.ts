@@ -1,4 +1,4 @@
-import { Curl, CurlMulti, AsyncEventLoop } from "@tocha688/libcurl"
+import { Curl, CurlMulti, AsyncEventLoop, CurlInfo } from "@tocha688/libcurl"
 import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
@@ -88,7 +88,12 @@ export class CurlMultiTimer extends CurlMulti {
                     if (!call || !msg.data) continue;
                     this.curls.delete(msg.easyId);
                     if (msg.data.result == 0) {
-                        call.resolve(parseResponse(call.curl, call.options));
+                        const status = call.curl.getInfoNumber(CurlInfo.ResponseCode) || 200;
+                        if (status < 100) {
+                            call.reject(new Error(call.curl.error(status)));
+                        } else {
+                            call.resolve(parseResponse(call.curl, call.options));
+                        }
                     } else {
                         call.reject(new Error(call.curl.error(msg.data.result)));
                     }
@@ -99,7 +104,7 @@ export class CurlMultiTimer extends CurlMulti {
             }
         } catch (e) {
             console.error('处理完成消息时出错:', e);
-        }finally{
+        } finally {
             this.isCecker = false;
         }
     }

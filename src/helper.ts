@@ -37,7 +37,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
     }
     if (body || ["POST", "PUT", "PATCH"].includes(method)) {
         const data = Buffer.from(body)
-        curl.setOptString(CurlOpt.PostFields, body);
+        curl.setOptBuffer(CurlOpt.PostFields, data);
         curl.setOptLong(CurlOpt.PostFieldSize, data.length);
         if (method == "GET") {
             curl.setOptString(CurlOpt.CustomRequest, method);
@@ -103,7 +103,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
     }
     if (opts.acceptEncoding) {
         curl.setOptString(CurlOpt.AcceptEncoding, opts.acceptEncoding);
-    }else{
+    } else {
         curl.setOptString(CurlOpt.AcceptEncoding, '');
     }
 
@@ -165,8 +165,8 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
 export function parseResponse(curl: Curl, req: RequestOptions) {
     // const url = curl.getInfoString(CurlInfo.EffectiveUrl) || req.url;
     // const status = curl.getInfoNumber(CurlInfo.ResponseCode);
-    const dataRaw = Buffer.from(curl.getRespBody());
-    const headerRaw = Buffer.from(curl.getRespHeaders()).toString('utf-8');
+    const dataRaw = curl.getRespBody();
+    const headerRaw = curl.getRespHeaders().toString('utf-8');
     //堆栈
     const stacks = [] as Array<CurlRequestInfo>
     const hds = parseResponseHeaders(headerRaw)
@@ -201,6 +201,6 @@ export function parseResponse(curl: Curl, req: RequestOptions) {
         }
         stacks.push(treq)
     })
-    return stacks[stacks.length - 1].response as CurlResponse;
+    return stacks[stacks.length > 0 ? stacks.length - 1 : 0].response as CurlResponse;
 }
 
