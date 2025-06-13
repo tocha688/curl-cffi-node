@@ -1,6 +1,6 @@
 {
   "name": "curl-cffi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node.js libcurl bindings using koffi with browser fingerprint capabilities",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -47,6 +47,11 @@
   "author": {
     "name": "tocha688",
     "url": "https://github.com/tocha688"
+  },
+  "homepage": "https://github.com/tocha688/curl-cffi-node",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tocha688/curl-cffi-node"
   },
   "license": "MIT",
   "packageManager": "pnpm@10.6.5",

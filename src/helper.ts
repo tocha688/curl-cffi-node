@@ -1,12 +1,12 @@
 import { Curl, CurlInfo, CurlOpt, CurlSslVersion } from "@tocha688/libcurl";
-import { RequestOptions, HttpHeaders, CurlResponse, CurlRequest } from "./type";
+import { RequestOptions, HttpHeaders, CurlResponse, CurlRequestInfo } from "./type";
 import { certPath } from "./app";
 import { buildUrl, parseResponseHeaders } from "./utils";
 import _ from "lodash";
 
 
 export function setRequestOptions(curl: Curl, opts: RequestOptions) {
-    const currentUrl = buildUrl(opts.url, opts.params);
+    const currentUrl = buildUrl(opts.url as string, opts.params);
     const method = opts.method?.toLocaleUpperCase() || 'GET';
     if (method == "POST") {
         curl.setOptLong(CurlOpt.Post, 1);
@@ -166,15 +166,15 @@ export function parseResponse(curl: Curl, req: RequestOptions) {
     const dataRaw = Buffer.from(curl.getRespBody());
     const headerRaw = Buffer.from(curl.getRespHeaders()).toString('utf-8');
     //堆栈
-    const stacks = [] as Array<CurlRequest>
+    const stacks = [] as Array<CurlRequestInfo>
     const hds = parseResponseHeaders(headerRaw)
     const jar = req.jar;
-    let nextReq = _.clone(req) as CurlRequest;
+    let nextReq = _.clone(req) as CurlRequestInfo;
     hds.forEach((header, i) => {
-        const treq = _.clone(nextReq) as CurlRequest;
+        const treq = _.clone(nextReq) as CurlRequestInfo;
         //构建响应体
         const res = new CurlResponse({
-            url: treq.url,
+            url: treq.url as string,
             headers: header,
             request: treq,
             options: req,
@@ -194,7 +194,7 @@ export function parseResponse(curl: Curl, req: RequestOptions) {
         //jar
         if (jar) {
             res.headers.get('set-cookie')?.forEach(cookie => {
-                jar.setCookieSync(cookie, treq.url);
+                jar.setCookieSync(cookie, treq.url as string);
             })
         }
         stacks.push(treq)

@@ -7,7 +7,7 @@ const currentDir = (() => {
         return __dirname; // CommonJS
     }
     //@ts-ignore
-    return path.dirname(fileURLToPath(import.meta.url)); // ESM
+    return path.dirname(fileURLToPath(eval(`import.meta.url`))); // ESM
 })();
 
 export const libsPath = path.join(currentDir, "..", 'libs');
