@@ -2,15 +2,8 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from "url";
 
-const currentDir = (() => {
-    if (typeof __dirname !== "undefined") {
-        return __dirname; // CommonJS
-    }
-    //@ts-ignore
-    return path.dirname(fileURLToPath(eval(`import.meta.url`))); // ESM
-})();
 
-export const libsPath = path.join(currentDir, "..", 'libs');
+export const libsPath = path.join(__dirname, "..", 'libs');
 export const certPath = path.join(libsPath, "cacert.pem");
 
 export function getDirName() {

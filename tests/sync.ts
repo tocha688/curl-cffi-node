@@ -17,7 +17,7 @@ req.request({
     // },
     // defaultHeaders: false,
     verify: false,
-    allowRedirects: false,
+    allowRedirects: true,
     // jar: new CookieJar(),
     // proxy: "http://127.0.0.1:10808",
 }).then(res => {

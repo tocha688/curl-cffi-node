@@ -7,6 +7,7 @@ export default defineConfig({
   splitting: true, // 适用于 ESM
   clean: true, // 清理旧的构建产物
   platform: "node",
+  shims: true,
   // outExtension({ format }) {
   //   return {
   //     js: format === 'esm' ? '.mjs' : '.cjs',
