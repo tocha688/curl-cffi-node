@@ -103,6 +103,8 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
     }
     if (opts.acceptEncoding) {
         curl.setOptString(CurlOpt.AcceptEncoding, opts.acceptEncoding);
+    }else{
+        curl.setOptString(CurlOpt.AcceptEncoding, '');
     }
 
     curl.setOptBool(CurlOpt.FollowLocation, opts.allowRedirects ?? true);

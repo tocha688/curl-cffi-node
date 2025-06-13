@@ -74,13 +74,19 @@ const loopCurl = new CurlRequestLoop();
 ### 会话管理
 
 ```javascript
-const { CurlSession,CurlSessionSync,CurlSessionLoop } = require('curl-cffi');
 // 会话请求
 const req1=new CurlSession()
 // 基于事件的异步请求实现
 const req2=new CurlSessionSync()
 // 基于定时器的异步请求实现
 const req3=new CurlSessionLoop()
+```
+
+### 性能优化
+
+```
+// 使用全局接口，复用连接，提高性能
+const req1=new CurlSession({impl:gimpl})
 ```
 
 ## 许可证

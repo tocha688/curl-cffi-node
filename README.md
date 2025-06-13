@@ -53,8 +53,6 @@ async function makeGetRequest() {
 makeGetRequest();
 ```
 
-
-
 ### Synchronous and Asynchronous Requests
 
 curl-cffi supports both synchronous and asynchronous request modes:
@@ -76,19 +74,26 @@ const loopCurl = new CurlRequestLoop();
 ### Session Management
 
 ```javascript
-const { CurlSession,CurlSessionSync,CurlSessionLoop } = require('curl-cffi');
+const { CurlSession, CurlSessionSync, CurlSessionLoop } = require('curl-cffi');
+
 // Session Request
-const req1=new CurlSession()
-// Asynchronous request with event-based implementation
-const req2=new CurlSessionSync()
-// Asynchronous request with timer-based implementation
-const req3=new CurlSessionLoop()
+const req1 = new CurlSession()
+// Synchronous session implementation
+const req2 = new CurlSessionSync()
+// Timer-based session implementation
+const req3 = new CurlSessionLoop()
 ```
 
+### Performance Optimization
+
+```javascript
+// Use global interface to reuse connections and improve performance
+const req1 = new CurlSession({impl: gimpl})
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 **Inspired by** [curl_cffi](https://github.com/lexiforest/curl_cffi)  
-**Uses** [curl-impersonate](https://github.com/lexiforest/curl-impersonate)
+**libcurl** [curl-impersonate](https://github.com/lexiforest/curl-impersonate)

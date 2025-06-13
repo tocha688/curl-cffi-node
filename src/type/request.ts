@@ -1,8 +1,9 @@
 import { CookieJar } from "tough-cookie";
 import { HttpHeaders } from "./header";
 import { CURL_IMPERSONATE } from "./const";
-import { CurlHttpVersion, CurlOpt } from "@tocha688/libcurl";
+import { CurlHttpVersion, CurlMulti, CurlOpt } from "@tocha688/libcurl";
 import { CurlResponse, defaultRequestOption } from ".";
+import { CurlMultiEvent, CurlMultiTimer } from "../impl";
 
 export type RequestAuth = {
     username: string;
@@ -43,6 +44,7 @@ export type RequestOptions = {
     maxRecvSpeed?: number;
     curlOptions?: Record<CurlOpt, string | number | boolean>;
     ipType?: IpType;
+    impl?: CurlMultiEvent | CurlMultiTimer;
 }
 
 export type CurlRequestInfo = RequestOptions & {
