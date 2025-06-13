@@ -59,7 +59,6 @@ export class CurlMultiEvent extends CurlMulti {
      */
     private setupCallbacks(): void {
         this.setSocketCallback(({ curl_id, sockfd, what }) => {
-            console.log(`Socket 回调: sockfd=${sockfd}, what=${what}`);
             // 先清理现有的读写器
             if (this.sockfds.has(sockfd)) {
                 this.loop.removeReader(sockfd);
@@ -105,9 +104,7 @@ export class CurlMultiEvent extends CurlMulti {
                 this.timers.forEach((timer) => clearTimeout(timer));
                 this.timers = [];
             } else {
-                console.log(`定时器回调: timeout=${timeout_ms}ms`);
                 this.timers.push(setTimeout(() => {
-                    console.log('定时器触发');
                     this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
                 }, timeout_ms));
             }
@@ -115,15 +112,13 @@ export class CurlMultiEvent extends CurlMulti {
     }
 
     private processData(sockfd: number, evBitmask: number): void {
-        console.log(`处理数据: sockfd=${sockfd}, evBitmask=${evBitmask}`);
         if (this.closed) return;
         try {
             const runSize = this.socketAction(sockfd, evBitmask);
-            console.log(`当前运行中的句柄数: ${runSize}`);
             // 检查是否有完成的传输
             this.curls.size > 0 && this.checkProcess();
         } catch (error) {
-            console.log('执行 socket action 时出错:', error);
+            // console.log('SocketAction Error:', error);
         }
     }
 
@@ -136,7 +131,6 @@ export class CurlMultiEvent extends CurlMulti {
                 if (!msg) {
                     break;
                 }
-                console.log('获取到消息', msg);
                 if (msg.msg === CURLMSG_DONE) {
                     const call = this.curls.get(msg.easyId);
                     if (!call || !msg.data) continue;
@@ -148,11 +142,11 @@ export class CurlMultiEvent extends CurlMulti {
                     }
                     call.curl.close();
                 } else {
-                    console.log(`NOT DONE`);
+                    // console.log(`NOT DONE`);
                 }
             }
         } catch (e) {
-            console.error('处理完成消息时出错:', e);
+            // console.error('处理完成消息时出错:', e);
         } finally {
             this.isCecker = false;
         }

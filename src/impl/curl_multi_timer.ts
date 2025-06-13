@@ -56,9 +56,7 @@ export class CurlMultiTimer extends CurlMulti {
                 this.timers.forEach((timer) => clearTimeout(timer));
                 this.timers = [];
             } else {
-                console.log(`定时器回调: timeout=${timeout_ms}ms`);
                 this.timers.push(setTimeout(() => {
-                    console.log('定时器触发');
                     this.processData();
                 }, timeout_ms));
             }
@@ -69,11 +67,10 @@ export class CurlMultiTimer extends CurlMulti {
         if (this.closed) return;
         try {
             const runSize = this.perform();
-            console.log(`当前运行中的句柄数: ${runSize}`);
             // 检查是否有完成的传输
             this.curls.size > 0 && this.checkProcess();
         } catch (error) {
-            console.log('执行 socket action 时出错:', error);
+            // console.log('执行 socket action 时出错:', error);
         }
     }
 
@@ -86,7 +83,6 @@ export class CurlMultiTimer extends CurlMulti {
                 if (!msg) {
                     break;
                 }
-                console.log('获取到消息', msg);
                 if (msg.msg === CURLMSG_DONE) {
                     const call = this.curls.get(msg.easyId);
                     if (!call || !msg.data) continue;
@@ -98,7 +94,7 @@ export class CurlMultiTimer extends CurlMulti {
                     }
                     call.curl.close();
                 } else {
-                    console.log(`NOT DONE`);
+                    // console.log(`NOT DONE`);
                 }
             }
         } catch (e) {
