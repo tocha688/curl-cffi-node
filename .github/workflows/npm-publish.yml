@@ -84,7 +84,7 @@ jobs:
       - name: Update package.json version
         run: |
           COMMIT_MSG="${{ github.event.head_commit.message }}"
-          VERSION=${COMMIT_MSG#v}  # 移除 v 前缀
+          VERSION=${COMMIT_MSG#v}
           npm version $VERSION --no-git-tag-version
           
       - name: Publish to npm
