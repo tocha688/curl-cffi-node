@@ -1,7 +1,8 @@
 import { CookieJar } from "tough-cookie";
-import { requestSync } from "../src"
+import { CurlClientSync } from "../src"
 
-const res = requestSync({
+const req = new CurlClientSync();
+req.request({
     url: 'https://www.google.com',
     // url: 'https://tls.peet.ws/api/all',
     method: 'GET',
@@ -12,9 +13,10 @@ const res = requestSync({
     defaultHeaders: false,
     // verify: false,
     jar: new CookieJar(),
-    proxy:"http://127.0.0.1:10808",
+    proxy: "http://127.0.0.1:10808",
+}).then(res=>{
+    console.log(res.statusCode);
+    console.log(res.text);
+    console.log(JSON.stringify(res.jar?.serializeSync()));
 })
 
-console.log(res.statusCode);
-console.log(res.text);
-console.log(JSON.stringify(res.jar?.serializeSync()));

@@ -19,7 +19,7 @@ export type IpType = 'ipv4' | 'ipv6' | 'auto';
 
 export type RequestOptions = {
     method?: RequestMethod;
-    url: string;
+    url?: string;
     params?: Record<string, any>;
     data?: Record<string, any> | string;
     jar?: CookieJar;

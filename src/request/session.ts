@@ -5,7 +5,7 @@ import { CurlRequestBase } from "./request_base";
 
 
 //同步方法
-export class SesionSync extends CurlRequestBase {
+export class CurlSesionSync extends CurlRequestBase {
     jar = new CookieJar();
     protected request(options: RequestOptions): Promise<CurlResponse> {
         return Promise.resolve(requestSync({
@@ -16,7 +16,7 @@ export class SesionSync extends CurlRequestBase {
 }
 
 //异步方法
-export class Session extends CurlRequestBase {
+export class CurlSession extends CurlRequestBase {
     jar = new CookieJar();
     private multi = new CurlMultiEvent();
     protected async request(options: RequestOptions): Promise<CurlResponse> {
@@ -31,7 +31,7 @@ export class Session extends CurlRequestBase {
 }
 
 //异步方法
-export class SessionLoop extends CurlRequestBase {
+export class CurlSessionLoop extends CurlRequestBase {
     jar = new CookieJar();
     private multi = new CurlMultiTimer();
     protected async request(options: RequestOptions): Promise<CurlResponse> {

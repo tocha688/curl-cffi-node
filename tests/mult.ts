@@ -1,5 +1,5 @@
 import { Curl } from "@tocha688/libcurl"
-import { req } from "../src"
+import { req, CurlClient } from "../src"
 import { CookieJar } from "tough-cookie";
 
 
@@ -8,7 +8,7 @@ const watis = [] as Array<Promise<any>>;
 watis.push(req.request({
     url: 'https://tls.peet.ws/api/all',
 }).then(res => {
-    console.log("请求成功 111",res.statusCode);
+    console.log("请求成功 111", res.statusCode);
 }).catch(err => {
     console.log("请求错误", err.message)
 }))
