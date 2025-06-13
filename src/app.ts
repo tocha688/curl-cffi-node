@@ -1,6 +1,5 @@
 import path from 'node:path';
 import os from 'node:os';
-import { fileURLToPath } from "url";
 
 
 export const libsPath = path.join(__dirname, "..", 'libs');
