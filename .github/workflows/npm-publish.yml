@@ -81,11 +81,11 @@ jobs:
           
       - run: pnpm install --frozen-lockfile
       
-      - name: Update package.json version
-        run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          VERSION=${COMMIT_MSG#v}
-          npm version $VERSION --no-git-tag-version
+      # - name: Update package.json version
+      #   run: |
+      #     COMMIT_MSG="${{ github.event.head_commit.message }}"
+      #     VERSION=${COMMIT_MSG#v}
+      #     npm version $VERSION --no-git-tag-version
           
       - name: Publish to npm
         run: npm publish --access public
