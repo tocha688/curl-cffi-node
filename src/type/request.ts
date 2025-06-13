@@ -24,7 +24,7 @@ export type RequestOptions = {
     params?: Record<string, any>;
     data?: Record<string, any> | string;
     jar?: CookieJar;
-    headers?: Record<string, string> | HttpHeaders;
+    headers?: Record<string, string>;
     auth?: RequestAuth;
     timeout?: number;
     allowRedirects?: boolean;
