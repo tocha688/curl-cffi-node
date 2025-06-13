@@ -88,7 +88,7 @@ const req3=new CurlSessionLoop()
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details. 
 
 **Inspired by** [curl_cffi](https://github.com/lexiforest/curl_cffi)  
 **Uses** [curl-impersonate](https://github.com/lexiforest/curl-impersonate)
