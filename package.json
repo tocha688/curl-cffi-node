@@ -1,6 +1,6 @@
 {
   "name": "curl-cffi",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A powerful HTTP client for Node.js based on libcurl with browser fingerprinting capabilities.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -62,7 +62,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@tocha688/libcurl": "link:..\\curl-impersonate",
+    "@tocha688/libcurl": "^0.0.6",
     "@types/lodash": "^4.17.17",
     "lodash": "^4.17.21",
     "tar": "^7.4.3",
