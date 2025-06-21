@@ -67,7 +67,16 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         curl.setOptString(CurlOpt.Password, password);
     }
     //timeout
-    curl.setOptLong(CurlOpt.TimeoutMs, (opts.timeout || 0) * 1000);
+    if (opts.timeout && opts.timeout > 0) {
+        //不是流传输
+        curl.setOptLong(CurlOpt.TimeoutMs, opts.timeout);
+        //     if not stream:
+        //     c.setopt(CurlOpt.TIMEOUT_MS, int(timeout * 1000))
+        // else:
+        //     c.setopt(CurlOpt.CONNECTTIMEOUT_MS, int(timeout * 1000))
+        //     c.setopt(CurlOpt.LOW_SPEED_LIMIT, 1)
+        //     c.setopt(CurlOpt.LOW_SPEED_TIME, math.ceil(timeout))
+    }
     //代理
     if (opts.proxy) {
         const proxy = new URL(opts.proxy);
