@@ -51,13 +51,25 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
     //cookie
     curl.setOptString(CurlOpt.CookieFile, '');
     curl.setOptString(CurlOpt.CookieList, 'ALL');
+    const cookies: string[] = [];
+    const cookieHeader = headers.first("cookie");
+    if (cookieHeader) {
+        //如果有cookie头，则不使用jar
+        if (cookieHeader) {
+            cookieHeader.split(';').forEach(cookie => {
+                cookies.push(cookie.trim());
+            });
+        }
+    }
     if (opts.jar) {
         const cookieJar = opts.jar;
-        const cookies = cookieJar.getCookiesSync(currentUrl);
-        if (cookies.length > 0) {
-            const cookieString = cookies.map(cookie => `${cookie.key}=${cookie.value}`).join('; ');
-            curl.setCookies(cookieString);
+        const jarCookies = cookieJar.getCookiesSync(currentUrl);
+        if (jarCookies.length > 0) {
+            jarCookies.forEach(cookie => cookies.push(`${cookie.key}=${cookie.value}`))
         }
+    }
+    if(cookies.length>0){
+        curl.setCookies(cookies.join('; '));
     }
 
     //auth
