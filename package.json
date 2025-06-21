@@ -57,11 +57,12 @@
   "packageManager": "pnpm@10.6.5",
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "p-limit": "^6.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@tocha688/libcurl": "^0.0.5",
+    "@tocha688/libcurl": "link:..\\curl-impersonate",
     "@types/lodash": "^4.17.17",
     "lodash": "^4.17.21",
     "tar": "^7.4.3",

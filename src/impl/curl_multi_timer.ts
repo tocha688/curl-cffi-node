@@ -2,6 +2,7 @@ import { Curl, CurlMulti, AsyncEventLoop, CurlInfo } from "@tocha688/libcurl"
 import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
+import { Logger } from "../logger";
 
 const CURL_POLL_NONE = 0
 const CURL_POLL_IN = 1
@@ -51,12 +52,14 @@ export class CurlMultiTimer extends CurlMulti {
      * 设置回调函数
      */
     private setupCallbacks(): void {
+        Logger.debug('setupCallbacks - setTimerCallback');
         this.setTimerCallback(({ timeout_ms }) => {
             if (timeout_ms == -1) {
                 this.timers.forEach((timer) => clearTimeout(timer));
                 this.timers = [];
             } else {
                 this.timers.push(setTimeout(() => {
+                    Logger.debug('CurlMultiTimer - setTimerCallback - timeout', timeout_ms);
                     this.processData();
                 }, timeout_ms));
             }
@@ -66,7 +69,9 @@ export class CurlMultiTimer extends CurlMulti {
     private processData(): void {
         if (this.closed) return;
         try {
+            Logger.debug('CurlMultiTimer - perform - start');
             const runSize = this.perform();
+            Logger.debug('CurlMultiTimer - perform - end', runSize);
             // 检查是否有完成的传输
             this.curls.size > 0 && this.checkProcess();
         } catch (error) {
@@ -79,7 +84,9 @@ export class CurlMultiTimer extends CurlMulti {
         if (this.isCecker) return;
         try {
             while (true) {
+                Logger.debug(`CurlMultiTimer - checkProcess - infoRead start`);
                 const msg = this.infoRead();
+                Logger.debug(`CurlMultiTimer - checkProcess - infoRead end`);
                 if (!msg) {
                     break;
                 }
@@ -88,7 +95,9 @@ export class CurlMultiTimer extends CurlMulti {
                     if (!call || !msg.data) continue;
                     this.curls.delete(msg.easyId);
                     if (msg.data.result == 0) {
+                        Logger.debug(`CurlMultiTimer - getInfoNumber - start`, msg.easyId);
                         const status = call.curl.getInfoNumber(CurlInfo.ResponseCode) || 200;
+                        Logger.debug(`CurlMultiTimer - getInfoNumber - end`, msg.easyId);
                         if (status < 100) {
                             call.reject(new Error(call.curl.error(status)));
                         } else {
@@ -97,13 +106,16 @@ export class CurlMultiTimer extends CurlMulti {
                     } else {
                         call.reject(new Error(call.curl.error(msg.data.result)));
                     }
+                    Logger.debug(`CurlMultiTimer - checkProcess - DONE`);
+                    this.removeHandle(call.curl);
                     call.curl.close();
+                    Logger.debug(`CurlMultiTimer - checkProcess - DONE OK`);
                 } else {
-                    // console.log(`NOT DONE`);
+                    Logger.warn(`CurlMultiTimer - checkProcess - NOT DONE`, msg);
                 }
             }
         } catch (e) {
-            console.error('处理完成消息时出错:', e);
+            Logger.error('处理完成消息时出错', e);
         } finally {
             this.isCecker = false;
         }
@@ -119,7 +131,9 @@ export class CurlMultiTimer extends CurlMulti {
                 resolve,
                 reject
             });
+            Logger.debug(`CurlMultiTimer - request - addHandle start`);
             this.addHandle(curl);
+            Logger.debug(`CurlMultiTimer - request - addHandle end`);
             // this.performSocketAction(CURL_SOCKET_TIMEOUT, 0);
             // 立即触发一次socket action来启动请求
             setImmediate(() => {
@@ -132,6 +146,7 @@ export class CurlMultiTimer extends CurlMulti {
 
     close(): void {
         if (this.closed) return;
+        Logger.debug(`CurlMultiTimer - close start`);
 
         // 清理强制超时定时器
         if (this.forceTimeoutTimer) {
