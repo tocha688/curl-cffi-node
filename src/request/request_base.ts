@@ -86,11 +86,14 @@ export class CurlRequestBase extends CurlRequestImplBase {
         this.multi =ops?.impl;
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
-        if (this.multi) {
-            return this.multi.request(options);
-        }
-        //同步
-        return requestSync(options);
+        let retryCount = this.baseOptions?.retryCount ?? 0;
+        do{
+            if (this.multi) {
+                return this.multi.request(options);
+            }
+            //同步
+            return requestSync(options);
+        }while(retryCount-- > 0);
     }
     close() {
         this.multi?.close();
