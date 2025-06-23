@@ -10,7 +10,7 @@ export class CurlRequestImplBase {
     ) {
         this.init()
     }
-    protected init(){}
+    protected init() { }
 
     protected request(options: RequestOptions): Promise<CurlResponse> {
         throw new Error("Method not implemented.");
@@ -83,17 +83,28 @@ export class CurlRequestBase extends CurlRequestImplBase {
     private multi?: CurlMultiEvent | CurlMultiTimer;
     constructor(ops?: RequestOptions) {
         super(ops);
-        this.multi =ops?.impl;
+        this.multi = ops?.impl;
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;
-        do{
-            if (this.multi) {
-                return this.multi.request(options);
+        let result: CurlResponse | undefined;
+        do {
+            try {
+                if (this.multi) {
+                    result = await this.multi.request(options);
+                } else {
+                    //同步
+                    result = await requestSync(options);
+                }
+            } catch (e) {
+                if (retryCount <= 0) {
+                    throw e;
+                }
+                //重试
+                console.warn(`Request failed, retrying... (${retryCount} retries left)`, e);
             }
-            //同步
-            return requestSync(options);
-        }while(retryCount-- > 0);
+        } while (retryCount-- > 0);
+        return result as CurlResponse;
     }
     close() {
         this.multi?.close();
