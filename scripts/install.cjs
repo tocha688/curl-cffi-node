@@ -6,7 +6,7 @@ const tar = require("tar");
 
 
 const homeDir = path.join(__dirname, "..", "libs");
-const version = "v1.0.1";
+const version = "v1.0.3";
 
 function getDirName() {
     const archMap = {
