@@ -1,7 +1,8 @@
 import test from 'ava'
-import { createRequire } from "node:module"
-const require = createRequire(import.meta.url)
-const { getVersion } = require('..')
+import { getVersion, getLibPath } from "../dist/index.mjs"
+// import { createRequire } from "node:module"
+// const require = createRequire(import.meta.url)
+// const { getVersion } = require('..')
 
 test('getVersion should return a valid version string', async (t) => {
     // 添加调试信息
@@ -21,4 +22,5 @@ test('getVersion should return a valid version string', async (t) => {
 
     // 打印版本信息以便于调试
     console.log(`Curl version: ${version}`)
+    console.log(`Lib path: ${getLibPath()}`)
 })
