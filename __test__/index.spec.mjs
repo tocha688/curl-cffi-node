@@ -1,13 +1,10 @@
 import test from 'ava'
-
+import {getVersion} from "../"
 test('getVersion should return a valid version string', async (t) => {
     // 添加调试信息
     console.log('Current working directory:', process.cwd())
     console.log('Node.js architecture:', process.arch)
     console.log('Platform:', process.platform)
-
-    // 尝试导入模块
-    const { getVersion } = await import('../index.js')
 
     const version = getVersion()
 
