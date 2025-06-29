@@ -80,7 +80,7 @@ jobs:
           path: dist/
           
       - run: pnpm install --frozen-lockfile
-      
+          
       # - name: Update package.json version
       #   run: |
       #     COMMIT_MSG="${{ github.event.head_commit.message }}"
@@ -91,3 +91,37 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18.x, 20.x]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.6.5
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Build package
+      run: pnpm build
+    
+    - name: Run tests
+      run: pnpm test
+      env:
+        CI: true
