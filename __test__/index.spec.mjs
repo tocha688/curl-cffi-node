@@ -21,6 +21,12 @@ test('getVersion should return a valid version string', async (t) => {
     console.log(`Curl version: ${version}`)
     console.log(`Lib path: ${getLibPath()}`)
     
-    process.exit(0)
 })
 
+// 添加测试后的清理
+test.after.always(() => {
+    gimpl.close();
+    setTimeout(() => {
+        process.exit(0)
+    }, 50)
+})
