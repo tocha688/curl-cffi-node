@@ -1,5 +1,8 @@
-const test = require('ava')
+import test from 'ava'
+import { createRequire } from "node:module"
+const require = createRequire(import.meta.url)
 const { getVersion } = require('..')
+
 test('getVersion should return a valid version string', async (t) => {
     // 添加调试信息
     console.log('Current working directory:', process.cwd())
