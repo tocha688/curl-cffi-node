@@ -8,30 +8,7 @@ on:
     branches: [main, master]  # 监听主分支的推送
 
 jobs:
-  check-version:
-    runs-on: ubuntu-latest
-    outputs:
-      should-publish: ${{ steps.check.outputs.should-publish }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check commit message for version
-        id: check
-        run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          echo "Commit message: $COMMIT_MSG"
-          
-          # 检查提交信息是否匹配 v*.*.* 格式
-          if [[ $COMMIT_MSG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "should-publish=true" >> $GITHUB_OUTPUT
-            echo "Version commit detected: $COMMIT_MSG"
-          else
-            echo "should-publish=false" >> $GITHUB_OUTPUT
-            echo "Not a version commit"
-          fi
-
   build:
-    needs: check-version
-    if: needs.check-version.outputs.should-publish == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,8 +33,7 @@ jobs:
           path: dist/
 
   test:
-    needs: [check-version, build]
-    if: needs.check-version.outputs.should-publish == 'true'
+    needs: build
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -94,6 +70,27 @@ jobs:
       - name: Test import (Windows)
         if: runner.os == 'Windows'
         run: node -e "console.log('Testing import...'); require('./dist/index.js');"
+
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.check.outputs.should-publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check commit message for version
+        id: check
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          echo "Commit message: $COMMIT_MSG"
+          
+          # 检查提交信息是否匹配 v*.*.* 格式
+          if [[ $COMMIT_MSG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+            echo "Version commit detected: $COMMIT_MSG"
+          else
+            echo "should-publish=false" >> $GITHUB_OUTPUT
+            echo "Not a version commit"
+          fi
 
   publish-npm:
     needs: [check-version, build, test]
