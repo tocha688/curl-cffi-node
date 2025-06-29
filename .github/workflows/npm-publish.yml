@@ -55,8 +55,48 @@ jobs:
           name: dist
           path: dist/
 
-  publish-npm:
+  test:
     needs: [check-version, build]
+    if: needs.check-version.outputs.should-publish == 'true'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.5
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          
+      - run: pnpm install --frozen-lockfile
+      
+      - name: Run tests
+        run: pnpm test --if-present
+        
+      - name: Test import (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: node -e "console.log('Testing import...'); require('./dist/index.js');"
+        
+      - name: Test import (Windows)
+        if: runner.os == 'Windows'
+        run: node -e "console.log('Testing import...'); require('./dist/index.js');"
+
+  publish-npm:
+    needs: [check-version, build, test]
     if: needs.check-version.outputs.should-publish == 'true'
     runs-on: ubuntu-latest
     steps:
@@ -92,36 +132,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
-  test:
-    name: Test on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [18.x, 20.x]
-      fail-fast: false
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 10.6.5
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
-    
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-    
-    - name: Build package
-      run: pnpm build
-    
-    - name: Run tests
-      run: pnpm test
-      env:
-        CI: true
