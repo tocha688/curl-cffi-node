@@ -21,13 +21,6 @@ test('getVersion should return a valid version string', async (t) => {
     console.log(`Curl version: ${version}`)
     console.log(`Lib path: ${getLibPath()}`)
     
-    gimpl.close();
+    process.exit(0)
 })
 
-// 添加测试后的清理
-test.after.always(() => {
-    // 强制清理所有定时器和异步资源
-    setTimeout(() => {
-        process.exit(0)
-    }, 50)
-})
