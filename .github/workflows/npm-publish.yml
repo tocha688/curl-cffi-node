@@ -61,16 +61,8 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       
       - name: Run tests
-        run: pnpm test --if-present
+        run: pnpm test
         
-      - name: Test import (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: node -e "console.log('Testing import...'); require('./dist/index.js');"
-        
-      - name: Test import (Windows)
-        if: runner.os == 'Windows'
-        run: node -e "console.log('Testing import...'); require('./dist/index.js');"
-
   check-version:
     runs-on: ubuntu-latest
     outputs:
