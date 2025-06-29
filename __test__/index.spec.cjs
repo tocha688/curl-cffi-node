@@ -1,5 +1,5 @@
 import test from 'ava'
-import {getVersion} from "../"
+const test = require('ava')
 test('getVersion should return a valid version string', async (t) => {
     // 添加调试信息
     console.log('Current working directory:', process.cwd())
