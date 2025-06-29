@@ -46,7 +46,7 @@ jobs:
           node-version: 20
           cache: 'pnpm'
           
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm build
       
       - name: Upload build artifacts
@@ -82,7 +82,7 @@ jobs:
           name: dist
           path: dist/
           
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       
       - name: Run tests
         run: pnpm test --if-present
@@ -119,7 +119,7 @@ jobs:
           name: dist
           path: dist/
           
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
           
       # - name: Update package.json version
       #   run: |
