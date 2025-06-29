@@ -1,4 +1,4 @@
-import { test } from 'ava'
+import test from 'ava'
 import { getVersion, getLibPath } from "../dist/index.mjs"
 // import { createRequire } from "node:module"
 // const require = createRequire(import.meta.url)
