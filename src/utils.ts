@@ -1,7 +1,6 @@
 import qs from "querystring";
 import { Cookie, CookieJar } from "tough-cookie";
 import { HttpHeaders } from "./type";
-import { Curl } from "@tocha688/libcurl";
 
 export function buildUrl(baseUrl: string, params?: Record<string, any>): string {
     if (!params) return baseUrl;

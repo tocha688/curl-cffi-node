@@ -7,7 +7,7 @@ export enum LogLevel {
 }
 
 export class Logger {
-    static level: LogLevel = LogLevel.none;
+    static level: LogLevel = LogLevel.info;
     private constructor() { }
     private static time() {
         return new Date().toISOString().replace('T', ' ').replace('Z', '');

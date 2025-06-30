@@ -33,5 +33,6 @@ export function getLibPath() {
         "darwin": "libcurl-impersonate.dylib",
         "linux": "libcurl-impersonate.so",
     }
+    libs[os.arch()]
     return path.join(libsPath, name, libs[os.platform()] || "libcurl-impersonate.so");
 }
