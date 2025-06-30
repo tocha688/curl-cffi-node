@@ -1,4 +1,4 @@
-import { globalInit, setLibPath,getLibPath as getLibPath2 } from '@tocha688/libcurl';
+import { globalInit, setLibPath } from '@tocha688/libcurl';
 import { getLibPath } from '../app';
 
 
