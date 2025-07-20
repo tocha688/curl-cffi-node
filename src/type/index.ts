@@ -8,7 +8,7 @@ export const defaultRequestOption: Partial<RequestOptions> = {
     maxRedirects: 5,
     verify: true,
     acceptEncoding: 'gzip, deflate, br',
-    impersonate: "chrome",
+    impersonate: "chrome136",
     maxRecvSpeed: 0,
     ipType: "auto",
     defaultHeaders: true,

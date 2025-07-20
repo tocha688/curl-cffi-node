@@ -52,7 +52,7 @@ async function downloadFile(url, outdir) {
                 }
             }, (response) => {
                 if (response.statusCode === 302 && response.headers.location) {
-                    console.log(`Redirecting to: ${response.headers.location}`);
+                    // console.log(`Redirecting to: ${response.headers.location}`);
                     requestFile(response.headers.location); // 重新请求新地址
                     return;
                 }
@@ -74,6 +74,8 @@ async function downloadFile(url, outdir) {
     });
 }
 
+
+
 async function loadLibs() {
     //检查文件是否存在
     const dirName = getDirName()
@@ -83,7 +85,10 @@ async function loadLibs() {
         return;
     }
     //下载文件
-    const url = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
+    const releases = await fetch(`https://api.github.com/repos/lexiforest/curl-impersonate/releases`).then(x => x.json());
+    const target = releases[0].assets.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
+    // const url = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
+    const url = target.browser_download_url;
     console.log(`Downloading from ${url}`);
     const tarPath = await downloadFile(url, homeDir);
     //解压缩
