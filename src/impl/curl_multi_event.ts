@@ -50,11 +50,12 @@ export class CurlMultiEvent extends CurlMulti {
         }
         const forceTimeout = () => {
             if (this.closed || this.curls.size < 1) return close();
-            // 强制处理超时，确保请求不会卡住
             this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
             this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
+            this.forceTimeoutTimer?.unref(); // 允许进程退出
         };
         this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
+        this.forceTimeoutTimer?.unref(); // 允许进程退出
     }
 
     /**

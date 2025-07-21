@@ -44,8 +44,10 @@ export class CurlMultiTimer extends CurlMulti {
             if (this.closed) return;
             this.processData();
             this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
+            this.forceTimeoutTimer.unref()
         };
         this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
+        this.forceTimeoutTimer.unref()
     }
 
     /**
