@@ -68,7 +68,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
             jarCookies.forEach(cookie => cookies.push(`${cookie.key}=${cookie.value}`))
         }
     }
-    if(cookies.length>0){
+    if (cookies.length > 0) {
         curl.setCookies(cookies.join('; '));
     }
 
@@ -88,6 +88,17 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         //     c.setopt(CurlOpt.CONNECTTIMEOUT_MS, int(timeout * 1000))
         //     c.setopt(CurlOpt.LOW_SPEED_LIMIT, 1)
         //     c.setopt(CurlOpt.LOW_SPEED_TIME, math.ceil(timeout))
+    }
+    //keep-alive
+    if (opts.keepAlive === false) {
+        //防止重用连接
+        curl.setOptBool(CurlOpt.ForbidReuse, true);
+        //使用新连接
+        curl.setOptBool(CurlOpt.FreshConnect, true);
+    }else{
+        curl.setOptBool(CurlOpt.ForbidReuse, false);
+        curl.setOptBool(CurlOpt.FreshConnect, false);
+        curl.setOptBool(CurlOpt.TcpKeepAlive, true);
     }
     //代理
     if (opts.proxy) {

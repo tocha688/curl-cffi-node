@@ -74,8 +74,6 @@ async function downloadFile(url, outdir) {
     });
 }
 
-
-
 async function loadLibs() {
     //检查文件是否存在
     const dirName = getDirName()

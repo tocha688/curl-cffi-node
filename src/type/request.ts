@@ -46,6 +46,7 @@ export type RequestOptions = {
     ipType?: IpType;
     impl?: CurlMultiEvent | CurlMultiTimer;
     retryCount?: number;
+    keepAlive?: boolean;
 }
 
 export type CurlRequestInfo = RequestOptions & {
