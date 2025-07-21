@@ -49,6 +49,11 @@ export type RequestOptions = {
     keepAlive?: boolean;
 }
 
+export type CurlOptions = RequestOptions & {
+    MaxConnects?: number;
+    MaxConcurrentStreams?: number;
+}
+
 export type CurlRequestInfo = RequestOptions & {
     // request?: CurlRequest;
     response: CurlResponse;

@@ -1,6 +1,6 @@
 import { CurlMOpt } from "@tocha688/libcurl";
 import { CurlMultiEvent, CurlMultiTimer, requestSync } from "../impl";
-import { CurlResponse, defaultRequestOption, RequestOptions } from "../type";
+import { CurlOptions, CurlResponse, defaultRequestOption, RequestOptions } from "../type";
 import _ from "lodash";
 
 type RequestData = Record<string, any> | string | URLSearchParams;
@@ -82,12 +82,12 @@ export class CurlRequestImplBase {
 
 export class CurlRequestBase extends CurlRequestImplBase {
     private multi?: CurlMultiEvent | CurlMultiTimer;
-    constructor(ops?: RequestOptions) {
+    constructor(ops?: CurlOptions) {
         super(ops);
         this.multi = ops?.impl;
         this.initOptions(ops);
     }
-    private initOptions(ops?: RequestOptions) {
+    private initOptions(ops?: CurlOptions) {
         if (!ops) return;
         if (!this.multi) return;
         if (ops.keepAlive == false) {
@@ -95,7 +95,8 @@ export class CurlRequestBase extends CurlRequestImplBase {
         } else {
             this.multi.setOptLong(CurlMOpt.Pipelining, 2)
         }
-        this.multi.setOptLong(CurlMOpt.MaxConnects, ops.maxRecvSpeed ?? 10);
+        this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
+        this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 5000);
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;
