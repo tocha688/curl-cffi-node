@@ -89,11 +89,11 @@ async function loadLibs() {
         }
     }).then(x => x.json());
     console.log(JSON.stringify(releases, null, 2));
-    let target = releases?.[0]?.assets?.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
-    if (!target) {
-        target = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
+    const target = releases?.[0]?.assets?.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
+    let url = target?.browser_download_url;
+    if (!url) {
+        url = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
     }
-    const url = target.browser_download_url;
     console.log(`Downloading from ${url}`);
     const tarPath = await downloadFile(url, homeDir);
     //解压缩
