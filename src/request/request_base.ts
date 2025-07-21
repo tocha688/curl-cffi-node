@@ -10,7 +10,7 @@ export class CurlRequestImplBase {
     ) {
         this.init()
     }
-    protected init() { }
+    protected init() {}
 
     protected request(options: RequestOptions): Promise<CurlResponse> {
         throw new Error("Method not implemented.");
@@ -84,6 +84,13 @@ export class CurlRequestBase extends CurlRequestImplBase {
     constructor(ops?: RequestOptions) {
         super(ops);
         this.multi = ops?.impl;
+        this.initOptions(ops);
+    }
+    private initOptions(ops?: RequestOptions) {
+        if(!ops)return;
+        if(ops.keepAlive==false){
+            
+        }
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;

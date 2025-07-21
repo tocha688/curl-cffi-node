@@ -6,7 +6,7 @@ const tar = require("tar");
 
 
 const homeDir = path.join(__dirname, "..", "libs");
-const version = "v1.0.3";
+const version = "v1.1.2";
 
 function getDirName() {
     const archMap = {
@@ -84,8 +84,10 @@ async function loadLibs() {
     }
     //下载文件
     const releases = await fetch(`https://api.github.com/repos/lexiforest/curl-impersonate/releases`).then(x => x.json());
-    const target = releases[0].assets.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
-    // const url = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
+    let target = releases?.[0]?.assets?.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
+    if(!target){
+        target = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
+    }
     const url = target.browser_download_url;
     console.log(`Downloading from ${url}`);
     const tarPath = await downloadFile(url, homeDir);
