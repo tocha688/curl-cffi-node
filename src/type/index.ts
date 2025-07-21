@@ -9,7 +9,7 @@ export const defaultRequestOption: Partial<RequestOptions> = {
     verify: true,
     acceptEncoding: 'gzip, deflate, br',
     impersonate: "chrome136",
-    maxRecvSpeed: 0,
+    // maxRecvSpeed: 0,
     ipType: "auto",
     defaultHeaders: true,
 };

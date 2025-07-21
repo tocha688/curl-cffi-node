@@ -1,3 +1,4 @@
+import { CurlMOpt } from "@tocha688/libcurl";
 import { CurlMultiEvent, CurlMultiTimer, requestSync } from "../impl";
 import { CurlResponse, defaultRequestOption, RequestOptions } from "../type";
 import _ from "lodash";
@@ -10,7 +11,7 @@ export class CurlRequestImplBase {
     ) {
         this.init()
     }
-    protected init() {}
+    protected init() { }
 
     protected request(options: RequestOptions): Promise<CurlResponse> {
         throw new Error("Method not implemented.");
@@ -87,10 +88,14 @@ export class CurlRequestBase extends CurlRequestImplBase {
         this.initOptions(ops);
     }
     private initOptions(ops?: RequestOptions) {
-        if(!ops)return;
-        if(ops.keepAlive==false){
-            
+        if (!ops) return;
+        if (!this.multi) return;
+        if (ops.keepAlive == false) {
+            this.multi.setOptLong(CurlMOpt.Pipelining, 1)
+        } else {
+            this.multi.setOptLong(CurlMOpt.Pipelining, 2)
         }
+        this.multi.setOptLong(CurlMOpt.MaxConnects, ops.maxRecvSpeed ?? 10);
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;
