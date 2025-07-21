@@ -83,9 +83,14 @@ async function loadLibs() {
         return;
     }
     //下载文件
-    const releases = await fetch(`https://api.github.com/repos/lexiforest/curl-impersonate/releases`).then(x => x.json());
+    const releases = await fetch(`https://api.github.com/repos/lexiforest/curl-impersonate/releases`, {
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+        }
+    }).then(x => x.json());
+    console.log(JSON.stringify(releases, null, 2));
     let target = releases?.[0]?.assets?.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
-    if(!target){
+    if (!target) {
         target = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${dirName}.tar.gz`
     }
     const url = target.browser_download_url;
