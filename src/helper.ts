@@ -95,11 +95,18 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         curl.setOptBool(CurlOpt.ForbidReuse, true);
         //使用新连接
         curl.setOptBool(CurlOpt.FreshConnect, true);
-    }else{
+    } else {
         curl.setOptBool(CurlOpt.ForbidReuse, false);
         curl.setOptBool(CurlOpt.FreshConnect, false);
-        curl.setOptBool(CurlOpt.TcpKeepAlive, true);
     }
+    curl.setOptLong(CurlOpt.TcpKeepAlive, 60);
+    curl.setOptLong(CurlOpt.TcpKeepIdle, 120);
+    curl.setOptLong(CurlOpt.TcpKeepIntvl, 60);
+    curl.setOptLong(CurlOpt.SslSessionIdCache, 1);
+    // curl.setOptLong(CurlOpt.TcpFastOpen, 1);
+
+    //缓存dns 10分钟
+    curl.setOptLong(CurlOpt.DnsCacheTimeout, 600);
     //代理
     if (opts.proxy) {
         const proxy = new URL(opts.proxy);

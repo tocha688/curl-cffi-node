@@ -97,6 +97,7 @@ export class CurlRequestBase extends CurlRequestImplBase {
         }
         this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
         this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 5000);
+
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;

@@ -36,25 +36,15 @@ export class CurlMultiEvent extends CurlMulti {
     constructor() {
         super();
         this.setupCallbacks();
-        // this.startForceTimeout();
+        this.startForceTimeout();
     }
 
-    private isStartLoopCheck = false;
     private startForceTimeout(): void {
-        if (this.isStartLoopCheck || this.closed || this.curls.size < 1) return
-        this.isStartLoopCheck = true;
-        Logger.debug('CurlMultiEvent - startForceTimeout');
-        const close = () => {
-            this.isStartLoopCheck = false;
-            Logger.debug('CurlMultiEvent - forceTimeout closed');
-        }
         const forceTimeout = () => {
-            if (this.closed || this.curls.size < 1) return close();
+            if (this.closed || this.curls.size < 1) return;
             this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
-            this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
-            this.forceTimeoutTimer?.unref(); // 允许进程退出
         };
-        this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
+        this.forceTimeoutTimer = setInterval(forceTimeout, 10);
         this.forceTimeoutTimer?.unref(); // 允许进程退出
     }
 
@@ -131,44 +121,50 @@ export class CurlMultiEvent extends CurlMulti {
         }
     }
 
-    private isCecker = false;
+    // private isCecker = false;
     private checkProcess() {
-        if (this.isCecker) return;
-        this.isCecker = true;
+        // if (this.isCecker) return;
+        // this.isCecker = true;
         try {
             while (true) {
                 Logger.debug(`CurlMultiEvent - checkProcess - infoRead start`);
-                const msg = this.infoRead();
-                Logger.debug(`CurlMultiEvent - checkProcess - infoRead end`, msg);
-                if (!msg) {
+                const curl_msg = this.infoRead();
+                Logger.debug(`CurlMultiEvent - checkProcess - infoRead end`, curl_msg);
+                if (!curl_msg) {
                     break;
                 }
-                if (msg.msg === CURLMSG_DONE) {
-                    const call = this.curls.get(msg.easyId);
-                    if (!call || !msg.data) continue;
-                    this.curls.delete(msg.easyId);
-                    if (msg.data.result == 0) {
-                        Logger.debug(`CurlMultiEvent - getInfoNumber - start`, msg.easyId);
-                        const status = call.curl.getInfoNumber(CurlInfo.ResponseCode) || 200;
-                        Logger.debug(`CurlMultiEvent - getInfoNumber - end`, msg.easyId);
-                        if (status < 100) {
-                            call.reject(new Error(call.curl.error(status)));
-                        } else {
-                            call.resolve(parseResponse(call.curl, call.options));
-                        }
+                if (curl_msg.msg === CURLMSG_DONE) {
+                    const call = this.curls.get(curl_msg.easyId);
+                    if (!call || !curl_msg.data) continue;
+                    this.curls.delete(curl_msg.easyId);
+                    const retcode = curl_msg.data.result
+                    if (retcode == 0) {
+                        call.resolve(parseResponse(call.curl, call.options));
                     } else {
-                        call.reject(new Error(call.curl.error(msg.data.result)));
+                        call.reject(new Error(call.curl.error(retcode)));
                     }
                     this.removeHandle(call.curl);
                     call.curl.close();
+                    // if (msg.data.result == 0) {
+                    //     Logger.debug(`CurlMultiEvent - getInfoNumber - start`, msg.easyId);
+                    //     const status = call.curl.getInfoNumber(CurlInfo.ResponseCode) || 200;
+                    //     Logger.debug(`CurlMultiEvent - getInfoNumber - end`, msg.easyId);
+                    //     if (status < 100) {
+                    //         call.reject(new Error(call.curl.error(status)));
+                    //     } else {
+                    //         call.resolve(parseResponse(call.curl, call.options));
+                    //     }
+                    // } else {
+                    //     call.reject(new Error(call.curl.error(msg.data.result)));
+                    // }
                 } else {
-                    Logger.warn(`CurlMultiEvent - checkProcess - NOT DONE`, msg);
+                    Logger.warn(`CurlMultiEvent - checkProcess - NOT DONE`, curl_msg);
                 }
             }
         } catch (e) {
             Logger.error('CurlMultiEvent - 处理完成消息时出错:', e);
         } finally {
-            this.isCecker = false;
+            // this.isCecker = false;
         }
     }
 
@@ -187,10 +183,11 @@ export class CurlMultiEvent extends CurlMulti {
             Logger.debug(`CurlMultiEvent - request - addHandle end`);
             // this.performSocketAction(CURL_SOCKET_TIMEOUT, 0);
             // 立即触发一次socket action来启动请求
-            this.startForceTimeout();
+            // this.startForceTimeout();
             setImmediate(() => {
                 if (this.closed) return;
                 this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
+                // this.startForceTimeout();
             });
         });
     }
@@ -201,7 +198,7 @@ export class CurlMultiEvent extends CurlMulti {
 
         // 清理强制超时定时器
         if (this.forceTimeoutTimer) {
-            clearTimeout(this.forceTimeoutTimer);
+            clearInterval(this.forceTimeoutTimer);
             this.forceTimeoutTimer = null;
         }
         super.close();

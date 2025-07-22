@@ -42,11 +42,11 @@ export class CurlMultiTimer extends CurlMulti {
     private startForceTimeout(): void {
         const forceTimeout = () => {
             if (this.closed) return;
-            this.processData();
-            this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
-            this.forceTimeoutTimer.unref()
+            if (this.curls.size > 0) {
+                this.processData();
+            }
         };
-        this.forceTimeoutTimer = setTimeout(forceTimeout, 1000);
+        this.forceTimeoutTimer = setInterval(forceTimeout, 10);
         this.forceTimeoutTimer.unref()
     }
 
@@ -77,6 +77,7 @@ export class CurlMultiTimer extends CurlMulti {
             // 检查是否有完成的传输
             this.curls.size > 0 && this.checkProcess();
         } catch (error) {
+            Logger.error('CurlMultiTimer - error', error);
             // console.log('执行 socket action 时出错:', error);
         }
     }
@@ -152,7 +153,7 @@ export class CurlMultiTimer extends CurlMulti {
 
         // 清理强制超时定时器
         if (this.forceTimeoutTimer) {
-            clearTimeout(this.forceTimeoutTimer);
+            clearInterval(this.forceTimeoutTimer);
             this.forceTimeoutTimer = null;
         }
 
