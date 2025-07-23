@@ -221,6 +221,7 @@ export function parseResponse(curl: Curl, req: RequestOptions) {
             options: req,
             stacks,
             index: stacks.length,
+            curl
         })
         res.redirects = Math.max(0, stacks.length - 1);
         treq.response = res;

@@ -12,6 +12,7 @@ export type CurlResponseOptions = {
     stacks?: Array<CurlRequestInfo>;
     options: RequestOptions;
     index?: number;
+    curl: Curl;
 }
 
 export class CurlResponse {
@@ -24,6 +25,7 @@ export class CurlResponse {
     stacks: Array<CurlRequestInfo> = [];
     index: number = 0;
     redirects: number = 0;
+    curl: Curl;
 
     constructor(opts: CurlResponseOptions) {
         this.url = opts.url ?? opts.request?.url ?? '';
@@ -34,6 +36,7 @@ export class CurlResponse {
         this.stacks = opts.stacks || [];
         this.options = opts.options;
         this.index = opts.index ?? 0;
+        this.curl = opts.curl;
     }
 
     get text() {
