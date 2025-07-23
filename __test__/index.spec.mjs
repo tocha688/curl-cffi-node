@@ -7,7 +7,7 @@ test('getVersion should return a valid version string', async (t) => {
     console.log('Node.js architecture:', process.arch)
     console.log('Platform:', process.platform)
 
-    const version = getVersion()
+    const version = libVersion()
 
     // 版本字符串应该是一个非空字符串
     t.true(typeof version === 'string')
@@ -19,7 +19,7 @@ test('getVersion should return a valid version string', async (t) => {
 
     // 打印版本信息以便于调试
     console.log(`Curl version: ${version}`)
-    console.log(`Lib path: ${getLibPath()}`)
+    console.log(`Lib path: ${libPath()}`)
     
 })
 
