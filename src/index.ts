@@ -3,6 +3,7 @@ export { CurlMOpt, CurlHttpVersion, CurlOpt, CurlError, CurlInfo, CurlIpResolve,
 export * from "./type";
 export * from "./request";
 export * from "./logger";
+export { CurlMultiImpl } from "./impl/index"
 export const libVersion = () => getVersion();
 export const libPath = () => getLibPathBase();
 
