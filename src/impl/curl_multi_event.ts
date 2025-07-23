@@ -3,6 +3,7 @@ import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
 import { Logger } from "../logger";
+import { Socket } from "net";
 
 const CURL_POLL_NONE = 0
 const CURL_POLL_IN = 1
@@ -28,7 +29,7 @@ type CurlData = {
 }
 export class CurlMultiEvent extends CurlMulti {
     private forceTimeoutTimer: NodeJS.Timeout | null = null;
-    private timers: Array<NodeJS.Timeout> = [];
+    private timers = new Set<NodeJS.Timeout>();
     curls: Map<string, CurlData> = new Map();
     private loop: AsyncEventLoop = new AsyncEventLoop();
     private sockfds: Set<number> = new Set();
@@ -36,74 +37,61 @@ export class CurlMultiEvent extends CurlMulti {
     constructor() {
         super();
         this.setupCallbacks();
-        this.startForceTimeout();
     }
 
-    private startForceTimeout(): void {
-        const forceTimeout = () => {
-            if (this.closed || this.curls.size < 1) return;
-            this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
-        };
-        this.forceTimeoutTimer = setInterval(forceTimeout, 10);
-        this.forceTimeoutTimer?.unref(); // 允许进程退出
-    }
-
-    /**
-     * 设置回调函数
-     */
     private setupCallbacks(): void {
         Logger.debug('setupCallbacks - setSocketCallback and setTimerCallback');
         this.setSocketCallback(({ curl_id, sockfd, what }) => {
             Logger.debug(`CurlMultiEvent - socketCallback: sockfd=${sockfd}, what=${what}`);
-            // 先清理现有的读写器
+
+            // 先清理现有的监听
             if (this.sockfds.has(sockfd)) {
-                this.loop.removeReader(sockfd);
-                this.loop.removeWriter(sockfd);
-            }
-            // 根据what值添加相应的读写器
-            if (what === CURL_POLL_IN) {
-                this.loop.addReader(sockfd, (sockfd, event_type) => {
-                    if (this.sockfds.has(sockfd) && !this.closed) {
-                        this.processData(sockfd, CURL_CSELECT_IN);
-                    }
-                });
-                this.sockfds.add(sockfd);
-            } else if (what === CURL_POLL_OUT) {
-                this.loop.addWriter(sockfd, (sockfd, event_type) => {
-                    if (this.sockfds.has(sockfd) && !this.closed) {
-                        this.processData(sockfd, CURL_CSELECT_OUT);
-                    }
-                });
-                this.sockfds.add(sockfd);
-            } else if (what === CURL_POLL_INOUT) {
-                // 同时处理读写
-                this.loop.addReader(sockfd, (sockfd, event_type) => {
-                    if (this.sockfds.has(sockfd) && !this.closed) {
-                        this.processData(sockfd, CURL_CSELECT_IN);
-                    }
-                });
-                this.loop.addWriter(sockfd, (sockfd, event_type) => {
-                    if (this.sockfds.has(sockfd) && !this.closed) {
-                        this.processData(sockfd, CURL_CSELECT_OUT);
-                    }
-                });
-                this.sockfds.add(sockfd);
-            } else if (what === CURL_POLL_REMOVE) {
                 this.loop.removeReader(sockfd);
                 this.loop.removeWriter(sockfd);
                 this.sockfds.delete(sockfd);
             }
+
+            if (what & CURL_POLL_REMOVE) {
+                return;
+            }
+
+            // 根据 what 值添加相应的监听
+            if (what & CURL_POLL_IN) {
+                this.loop.addReader(sockfd, (sockfd, event_type) => {
+                    if (this.sockfds.has(sockfd) && !this.closed) {
+                        Logger.debug(`Socket readable: sockfd=${sockfd}`);
+                        setImmediate(() => {
+                            this.processData(sockfd, CURL_CSELECT_IN);
+                        });
+                    }
+                });
+            }
+
+            if (what & CURL_POLL_OUT) {
+                this.loop.addWriter(sockfd, (sockfd, event_type) => {
+                    if (this.sockfds.has(sockfd) && !this.closed) {
+                        Logger.debug(`Socket writable: sockfd=${sockfd}`);
+                        setImmediate(() => {
+                            this.processData(sockfd, CURL_CSELECT_OUT);
+                        });
+                    }
+                });
+            }
+
+            this.sockfds.add(sockfd);
         });
 
         this.setTimerCallback(({ timeout_ms }) => {
             Logger.debug(`CurlMultiEvent - timerCallback: timeout_ms=${timeout_ms}`);
             if (timeout_ms == -1) {
                 this.timers.forEach((timer) => clearTimeout(timer));
-                this.timers = [];
+                this.timers.clear();
             } else {
-                this.timers.push(setTimeout(() => {
+                const timer = setTimeout(() => {
                     this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
-                }, timeout_ms));
+                    this.timers.delete(timer);
+                }, timeout_ms);
+                this.timers.add(timer);
             }
         });
     }
@@ -111,25 +99,20 @@ export class CurlMultiEvent extends CurlMulti {
     private processData(sockfd: number, evBitmask: number): void {
         if (this.closed) return;
         try {
-            Logger.debug('CurlMultiEvent - socketAction - start', { sockfd, evBitmask });
-            const runSize = this.socketAction(sockfd, evBitmask);
+            // Logger.debug('CurlMultiEvent - socketAction - start', { sockfd, evBitmask });
+            let runSize = this.socketAction(sockfd, evBitmask);
             Logger.debug('CurlMultiEvent - socketAction - end', { sockfd, evBitmask, runSize });
             // 检查是否有完成的传输
-            this.curls.size > 0 && this.checkProcess();
+            this.checkProcess();
         } catch (error) {
             Logger.error('CurlMultiEvent - processData error:', error);
         }
     }
 
-    // private isCecker = false;
     private checkProcess() {
-        // if (this.isCecker) return;
-        // this.isCecker = true;
         try {
             while (true) {
-                Logger.debug(`CurlMultiEvent - checkProcess - infoRead start`);
                 const curl_msg = this.infoRead();
-                Logger.debug(`CurlMultiEvent - checkProcess - infoRead end`, curl_msg);
                 if (!curl_msg) {
                     break;
                 }
@@ -145,18 +128,6 @@ export class CurlMultiEvent extends CurlMulti {
                     }
                     this.removeHandle(call.curl);
                     call.curl.close();
-                    // if (msg.data.result == 0) {
-                    //     Logger.debug(`CurlMultiEvent - getInfoNumber - start`, msg.easyId);
-                    //     const status = call.curl.getInfoNumber(CurlInfo.ResponseCode) || 200;
-                    //     Logger.debug(`CurlMultiEvent - getInfoNumber - end`, msg.easyId);
-                    //     if (status < 100) {
-                    //         call.reject(new Error(call.curl.error(status)));
-                    //     } else {
-                    //         call.resolve(parseResponse(call.curl, call.options));
-                    //     }
-                    // } else {
-                    //     call.reject(new Error(call.curl.error(msg.data.result)));
-                    // }
                 } else {
                     Logger.warn(`CurlMultiEvent - checkProcess - NOT DONE`, curl_msg);
                 }
@@ -164,7 +135,6 @@ export class CurlMultiEvent extends CurlMulti {
         } catch (e) {
             Logger.error('CurlMultiEvent - 处理完成消息时出错:', e);
         } finally {
-            // this.isCecker = false;
         }
     }
 
@@ -201,17 +171,21 @@ export class CurlMultiEvent extends CurlMulti {
             clearInterval(this.forceTimeoutTimer);
             this.forceTimeoutTimer = null;
         }
+        
         super.close();
-        //清理事件
+        
+        // 清理事件监听
         this.sockfds.forEach((sockfd) => {
             this.loop.removeReader(sockfd);
             this.loop.removeWriter(sockfd);
         });
         this.sockfds.clear();
-        //清理timers
+        
+        // 清理定时器
         this.timers.forEach((timer) => clearTimeout(timer));
-        this.timers = [];
-        //回调
+        this.timers.clear();
+        
+        // 清理回调
         this.curls.forEach((call) => {
             call.reject(new Error('CurlPools is closed'));
         });

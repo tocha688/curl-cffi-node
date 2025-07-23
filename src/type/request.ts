@@ -3,7 +3,7 @@ import { HttpHeaders } from "./header";
 import { CURL_IMPERSONATE } from "./const";
 import { CurlHttpVersion, CurlMulti, CurlOpt } from "@tocha688/libcurl";
 import { CurlResponse, defaultRequestOption } from ".";
-import { CurlMultiEvent, CurlMultiTimer } from "../impl";
+import { CurlMultiImpl } from "../impl";
 
 export type RequestAuth = {
     username: string;
@@ -44,7 +44,7 @@ export type RequestOptions = {
     maxRecvSpeed?: number;
     curlOptions?: Record<CurlOpt, string | number | boolean>;
     ipType?: IpType;
-    impl?: CurlMultiEvent | CurlMultiTimer;
+    impl?: CurlMultiImpl;
     retryCount?: number;
     keepAlive?: boolean;
 }

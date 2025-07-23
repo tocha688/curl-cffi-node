@@ -1,5 +1,5 @@
 import { CurlMOpt } from "@tocha688/libcurl";
-import { CurlMultiEvent, CurlMultiTimer, requestSync } from "../impl";
+import { CurlMultiImpl, requestSync } from "../impl";
 import { CurlOptions, CurlResponse, defaultRequestOption, RequestOptions } from "../type";
 import _ from "lodash";
 
@@ -81,7 +81,7 @@ export class CurlRequestImplBase {
 }
 
 export class CurlRequestBase extends CurlRequestImplBase {
-    private multi?: CurlMultiEvent | CurlMultiTimer;
+    private multi?: CurlMultiImpl;
     constructor(ops?: CurlOptions) {
         super(ops);
         this.multi = ops?.impl;
@@ -90,11 +90,12 @@ export class CurlRequestBase extends CurlRequestImplBase {
     private initOptions(ops?: CurlOptions) {
         if (!ops) return;
         if (!this.multi) return;
-        if (ops.keepAlive == false) {
-            this.multi.setOptLong(CurlMOpt.Pipelining, 1)
-        } else {
-            this.multi.setOptLong(CurlMOpt.Pipelining, 2)
-        }
+        // if (ops.keepAlive == false) {
+        //     this.multi.setOptLong(CurlMOpt.Pipelining, 1)
+        // } else {
+        //     this.multi.setOptLong(CurlMOpt.Pipelining, 2)
+        // }
+        this.multi.setOptLong(CurlMOpt.Pipelining, 2)
         this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
         this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 5000);
 
@@ -123,10 +124,10 @@ export class CurlRequestBase extends CurlRequestImplBase {
     close() {
         this.multi?.close();
     }
-    setImpl(impl?: CurlMultiEvent | CurlMultiTimer) {
+    setImpl(impl?: CurlMultiImpl) {
         this.multi = impl
     }
-    getImpl(): CurlMultiEvent | CurlMultiTimer | undefined {
+    getImpl(): CurlMultiImpl | undefined {
         return this.multi;
     }
 }
