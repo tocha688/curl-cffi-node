@@ -1,5 +1,5 @@
 import test from 'ava'
-import { getVersion, getLibPath, gimpl } from "../dist/index.mjs"
+import { libVersion, libPath, gimpl } from "../dist/index.mjs"
 
 test('getVersion should return a valid version string', async (t) => {
     // 添加调试信息
