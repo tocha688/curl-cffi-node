@@ -8,7 +8,7 @@ export const certPath = path.join(libsPath, "cacert.pem");
 export function getDirName() {
     const archMap: Record<string, string> = {
         "x64": "x86_64",
-        "arm64": "arm64",
+        "arm64": os.platform() == "linux" ? "aarch64" : "arm64",
         "arm": "arm-linux-gnueabihf",
         "riscv64": "riscv64",
         "i386": "i386",
