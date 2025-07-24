@@ -122,9 +122,20 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         }
     }
     // 显式禁用SSL验证
-    if (opts.verify !== true) {
+    if (opts.verify === false) {
         curl.setOptLong(CurlOpt.SslVerifyPeer, 0);
         curl.setOptLong(CurlOpt.SslVerifyHost, 0);
+    } else {
+        curl.setOptLong(CurlOpt.SslVerifyPeer, 1);
+        curl.setOptLong(CurlOpt.SslVerifyHost, 2);
+        //设置证书
+        curl.setOptString(CurlOpt.CaInfo, certPath);
+        curl.setOptString(CurlOpt.ProxyCaInfo, certPath);
+    }
+
+    //指纹
+    if (opts.impersonate) {
+        curl.impersonate(opts.impersonate, opts.defaultHeaders ?? true);
     }
 
     // referer
@@ -135,6 +146,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
     if (opts.acceptEncoding) {
         curl.setOptString(CurlOpt.AcceptEncoding, opts.acceptEncoding);
     }
+
     //单独证书
     if (typeof opts.cert === 'string') {
         curl.setOptString(CurlOpt.SslCert, opts.cert);
@@ -189,10 +201,6 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         // curl.setOptLong(CurlOpt.Header, 1);
         // curl.setOptLong(CurlOpt.NoProgress, 0);
     }
-    //指纹 - 移到最后设置
-    if (opts.impersonate) {
-        curl.impersonate(opts.impersonate, opts.defaultHeaders ?? true);
-    }
     // since 0 is a valid value to disable it
     curl.setOptLong(CurlOpt.MaxRecvSpeedLarge, opts.maxRecvSpeed ?? 0);
     //参数
@@ -210,9 +218,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
             }
         }
     }
-    //设置证书
-    curl.setOptString(CurlOpt.CaInfo, certPath);
-    curl.setOptString(CurlOpt.ProxyCaInfo, certPath);
+
 }
 
 

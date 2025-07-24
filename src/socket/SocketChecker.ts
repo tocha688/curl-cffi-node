@@ -31,7 +31,7 @@ export class SocketChecker extends EventEmitter {
                 console.log(`SocketChecker - checkSocket: id=${id}, sockfd=${sockfd} not found`);
                 clearInterval(info);
             }
-        }, 50);
+        }, 10);
         this.sockfds.set(id, info);
         return info;
     }
