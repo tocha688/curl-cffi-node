@@ -10,7 +10,8 @@ export function requestSync(options: RequestOptions): CurlResponse {
             ...defaultRequestOption,
             ...options
         }
-        if (options.curl) options.curl.reset()
+        if (options.curl) options.curl.reset();
+        setRequestOptions(curl, options);
         curl.perform();
         return parseResponse(curl, options);
     } finally {
