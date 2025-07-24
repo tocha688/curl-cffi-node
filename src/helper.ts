@@ -2,7 +2,7 @@ import { Curl, CurlInfo, CurlOpt, CurlSslVersion } from "@tocha688/libcurl";
 import { RequestOptions, HttpHeaders, CurlResponse, CurlRequestInfo, defaultRequestOption } from "./type";
 import { certPath } from "./app";
 import { buildUrl, normalize_http_version, parseResponseHeaders } from "./utils";
-import _, { isNull } from "lodash";
+import _ from "lodash";
 
 
 export function setRequestOptions(curl: Curl, opts: RequestOptions) {
@@ -93,9 +93,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         curl.setOptString(CurlOpt.Username, username);
         curl.setOptString(CurlOpt.Password, password);
     }
-    if (isNull(opts.timeout)) {
-        opts.timeout = 0;
-    }
+    opts.timeout = opts.timeout ?? 0;
     //timeout
     if (opts.timeout && opts.timeout > 0) {
         //不是流传输
