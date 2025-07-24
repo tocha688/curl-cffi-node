@@ -7,11 +7,12 @@ export const defaultRequestOption: Partial<RequestOptions> = {
     allowRedirects: true,
     maxRedirects: 5,
     verify: true,
-    acceptEncoding: 'gzip, deflate, br',
-    impersonate: "chrome136",
+    acceptEncoding: 'gzip, deflate, br, zstd',
+    // impersonate: "chrome136",
     // maxRecvSpeed: 0,
     ipType: "auto",
     defaultHeaders: true,
+    maxRecvSpeed: 0,
 };
 
 export * from "./request";

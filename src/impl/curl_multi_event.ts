@@ -1,9 +1,10 @@
-import { Curl, CurlMulti, AsyncEventLoop, CurlInfo } from "@tocha688/libcurl"
+import { Curl, CurlMulti, CurlInfo } from "@tocha688/libcurl"
 import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
 import { Logger } from "../logger";
 import { Socket } from "net";
+import { SocketChecker } from "../socket/SocketChecker";
 
 const CURL_POLL_NONE = 0
 const CURL_POLL_IN = 1
@@ -31,12 +32,27 @@ export class CurlMultiEvent extends CurlMulti {
     private forceTimeoutTimer: NodeJS.Timeout | null = null;
     private timers = new Set<NodeJS.Timeout>();
     curls: Map<string, CurlData> = new Map();
-    private loop: AsyncEventLoop = new AsyncEventLoop();
+    private loop: SocketChecker = new SocketChecker();
     private sockfds: Set<number> = new Set();
 
     constructor() {
         super();
         this.setupCallbacks();
+        this.startForceTimeout();
+    }
+    private startForceTimeout(): void {
+        if (this.forceTimeoutTimer) {
+            clearInterval(this.forceTimeoutTimer);
+        }
+
+        this.forceTimeoutTimer = setInterval(() => {
+            if (this.closed) return;
+            Logger.debug('Force timeout triggered');
+            this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
+        }, 1000);
+
+        // 不阻塞进程退出
+        this.forceTimeoutTimer.unref();
     }
 
     private setupCallbacks(): void {
@@ -48,11 +64,7 @@ export class CurlMultiEvent extends CurlMulti {
             if (this.sockfds.has(sockfd)) {
                 this.loop.removeReader(sockfd);
                 this.loop.removeWriter(sockfd);
-                this.sockfds.delete(sockfd);
-            }
-
-            if (what & CURL_POLL_REMOVE) {
-                return;
+                // this.sockfds.delete(sockfd);
             }
 
             // 根据 what 值添加相应的监听
@@ -60,25 +72,26 @@ export class CurlMultiEvent extends CurlMulti {
                 this.loop.addReader(sockfd, (sockfd, event_type) => {
                     if (this.sockfds.has(sockfd) && !this.closed) {
                         Logger.debug(`Socket readable: sockfd=${sockfd}`);
-                        setImmediate(() => {
-                            this.processData(sockfd, CURL_CSELECT_IN);
-                        });
+                        this.processData(sockfd, CURL_CSELECT_IN);
                     }
                 });
+                this.sockfds.add(sockfd);
             }
 
             if (what & CURL_POLL_OUT) {
                 this.loop.addWriter(sockfd, (sockfd, event_type) => {
                     if (this.sockfds.has(sockfd) && !this.closed) {
                         Logger.debug(`Socket writable: sockfd=${sockfd}`);
-                        setImmediate(() => {
-                            this.processData(sockfd, CURL_CSELECT_OUT);
-                        });
+                        this.processData(sockfd, CURL_CSELECT_OUT);
                     }
                 });
+                this.sockfds.add(sockfd);
             }
 
-            this.sockfds.add(sockfd);
+            if (what & CURL_POLL_REMOVE) {
+                this.sockfds.delete(sockfd);
+            }
+
         });
 
         this.setTimerCallback(({ timeout_ms }) => {
@@ -127,7 +140,7 @@ export class CurlMultiEvent extends CurlMulti {
                         call.reject(new Error(call.curl.error(retcode)));
                     }
                     this.removeHandle(call.curl);
-                    call.curl.close();
+                    // call.curl.reset();
                 } else {
                     Logger.warn(`CurlMultiEvent - checkProcess - NOT DONE`, curl_msg);
                 }
@@ -140,7 +153,8 @@ export class CurlMultiEvent extends CurlMulti {
 
     async request(ops: RequestOptions): Promise<CurlResponse> {
         return new Promise((resolve, reject) => {
-            const curl = new Curl();
+            const curl = ops.curl ?? new Curl();
+            if(ops.curl)ops.curl.reset()
             setRequestOptions(curl, ops);
             this.curls.set(curl.id(), {
                 options: ops,
@@ -152,12 +166,9 @@ export class CurlMultiEvent extends CurlMulti {
             this.addHandle(curl);
             Logger.debug(`CurlMultiEvent - request - addHandle end`);
             // this.performSocketAction(CURL_SOCKET_TIMEOUT, 0);
-            // 立即触发一次socket action来启动请求
-            // this.startForceTimeout();
             setImmediate(() => {
                 if (this.closed) return;
                 this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
-                // this.startForceTimeout();
             });
         });
     }
@@ -171,20 +182,20 @@ export class CurlMultiEvent extends CurlMulti {
             clearInterval(this.forceTimeoutTimer);
             this.forceTimeoutTimer = null;
         }
-        
+
         super.close();
-        
+
         // 清理事件监听
         this.sockfds.forEach((sockfd) => {
             this.loop.removeReader(sockfd);
             this.loop.removeWriter(sockfd);
         });
         this.sockfds.clear();
-        
+
         // 清理定时器
         this.timers.forEach((timer) => clearTimeout(timer));
         this.timers.clear();
-        
+
         // 清理回调
         this.curls.forEach((call) => {
             call.reject(new Error('CurlPools is closed'));

@@ -64,7 +64,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@tocha688/libcurl": "^0.0.11",
+    "@tocha688/libcurl": "^0.0.12",
     "@types/lodash": "^4.17.17",
     "lodash": "^4.17.21",
     "tar": "^7.4.3",

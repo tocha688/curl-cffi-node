@@ -1,11 +1,13 @@
 import { Curl, CurlInfo, CurlOpt, CurlSslVersion } from "@tocha688/libcurl";
-import { RequestOptions, HttpHeaders, CurlResponse, CurlRequestInfo } from "./type";
+import { RequestOptions, HttpHeaders, CurlResponse, CurlRequestInfo, defaultRequestOption } from "./type";
 import { certPath } from "./app";
-import { buildUrl, parseResponseHeaders } from "./utils";
-import _ from "lodash";
+import { buildUrl, normalize_http_version, parseResponseHeaders } from "./utils";
+import _, { isNull } from "lodash";
 
 
 export function setRequestOptions(curl: Curl, opts: RequestOptions) {
+    //合并
+    opts = { ...defaultRequestOption, ...opts };
     const currentUrl = buildUrl(opts.url as string, opts.params);
     const method = opts.method?.toLocaleUpperCase() || 'GET';
     if (method == "POST") {
@@ -28,12 +30,17 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         if (body instanceof URLSearchParams) {
             body = opts.data.toString()
             contentType = 'application/x-www-form-urlencoded';
+        } else if (Buffer.isBuffer(body)) {
+            body = opts.data;
+            contentType = 'application/octet-stream';
         } else {
             body = JSON.stringify(opts.data)
             contentType = 'application/json';
         }
     } else if (typeof opts.data === 'string') {
         body = opts.data;
+    } else {
+        body = ""
     }
     if (body || ["POST", "PUT", "PATCH"].includes(method)) {
         const data = Buffer.from(body)
@@ -43,33 +50,41 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
             curl.setOptString(CurlOpt.CustomRequest, method);
         }
     }
-
     if (contentType) {
         headers.set('Content-Type', contentType);
     }
-    curl.setHeaders(headers.toObject());
+    // # Never send `Expect` header.
+    headers.delete("Expect")
+    // curl.setOptList(CurlOpt.HttpHeader, headers.toArray());
+    curl.setHeadersRaw(headers.toArray());
     //cookie
-    curl.setOptString(CurlOpt.CookieFile, '');
+    curl.setOptString(CurlOpt.CookieFile, "");
     curl.setOptString(CurlOpt.CookieList, 'ALL');
-    const cookies: string[] = [];
     const cookieHeader = headers.first("cookie");
-    if (cookieHeader) {
-        //如果有cookie头，则不使用jar
+    if (cookieHeader || opts.jar) {
+        const cookies = new Map<string, string>();
         if (cookieHeader) {
-            cookieHeader.split(';').forEach(cookie => {
-                cookies.push(cookie.trim());
-            });
+            //如果有cookie头，则不使用jar
+            if (cookieHeader) {
+                cookieHeader.split(';').forEach(cookie => {
+                    const [key, value] = cookie.split('=');
+                    cookies.set(key.trim(), value.trim());
+                });
+            }
         }
-    }
-    if (opts.jar) {
-        const cookieJar = opts.jar;
-        const jarCookies = cookieJar.getCookiesSync(currentUrl);
-        if (jarCookies.length > 0) {
-            jarCookies.forEach(cookie => cookies.push(`${cookie.key}=${cookie.value}`))
+        if (opts.jar) {
+            const cookieJar = opts.jar;
+            const jarCookies = cookieJar.getCookiesSync(currentUrl);
+            if (jarCookies.length > 0) {
+                jarCookies.forEach(cookie => {
+                    cookies.set(cookie.key, cookie.value);
+                })
+            }
         }
-    }
-    if (cookies.length > 0) {
-        curl.setCookies(cookies.join('; '));
+        if (cookies.size > 0) {
+            const cookieStr = Array.from(cookies.entries()).map(([key, value]) => `${key}=${value}`).join('; ')
+            curl.setCookies(cookieStr)
+        }
     }
 
     //auth
@@ -77,6 +92,9 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         const { username, password } = opts.auth;
         curl.setOptString(CurlOpt.Username, username);
         curl.setOptString(CurlOpt.Password, password);
+    }
+    if (isNull(opts.timeout)) {
+        opts.timeout = 0;
     }
     //timeout
     if (opts.timeout && opts.timeout > 0) {
@@ -89,24 +107,10 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         //     c.setopt(CurlOpt.LOW_SPEED_LIMIT, 1)
         //     c.setopt(CurlOpt.LOW_SPEED_TIME, math.ceil(timeout))
     }
-    //keep-alive
-    if (opts.keepAlive === false) {
-        //防止重用连接
-        curl.setOptBool(CurlOpt.ForbidReuse, true);
-        //使用新连接
-        curl.setOptBool(CurlOpt.FreshConnect, true);
-    } else {
-        curl.setOptBool(CurlOpt.ForbidReuse, false);
-        curl.setOptBool(CurlOpt.FreshConnect, false);
-    }
-    curl.setOptLong(CurlOpt.TcpKeepAlive, 60);
-    curl.setOptLong(CurlOpt.TcpKeepIdle, 120);
-    curl.setOptLong(CurlOpt.TcpKeepIntvl, 60);
-    curl.setOptLong(CurlOpt.SslSessionIdCache, 1);
-    // curl.setOptLong(CurlOpt.TcpFastOpen, 1);
+    // allow_redirects
+    curl.setOptBool(CurlOpt.FollowLocation, opts.allowRedirects ?? true);
+    curl.setOptLong(CurlOpt.MaxRedirs, opts.maxRedirects ?? 30);
 
-    //缓存dns 10分钟
-    curl.setOptLong(CurlOpt.DnsCacheTimeout, 600);
     //代理
     if (opts.proxy) {
         const proxy = new URL(opts.proxy);
@@ -120,15 +124,18 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         }
     }
     // 显式禁用SSL验证
-    if (opts.verify === false) {
+    if (opts.verify !== true) {
         curl.setOptLong(CurlOpt.SslVerifyPeer, 0);
         curl.setOptLong(CurlOpt.SslVerifyHost, 0);
-    } else {
-        curl.setOptLong(CurlOpt.SslVerifyPeer, 1);
-        curl.setOptLong(CurlOpt.SslVerifyHost, 2);
-        curl.setOptString(CurlOpt.CaInfo, certPath);
-        curl.setOptString(CurlOpt.ProxyCaInfo, certPath);
-        // curl.setOptLong(CurlOpt.SslVersion, CurlSslVersion.MaxDefault);
+    }
+
+    // referer
+    if (opts.referer) {
+        curl.setOptString(CurlOpt.Referer, opts.referer);
+    }
+    // accept_encoding
+    if (opts.acceptEncoding) {
+        curl.setOptString(CurlOpt.AcceptEncoding, opts.acceptEncoding);
     }
     //单独证书
     if (typeof opts.cert === 'string') {
@@ -137,32 +144,22 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
         !!opts.cert?.cert && curl.setOptString(CurlOpt.SslCert, opts.cert.cert);
         !!opts.cert?.key && curl.setOptString(CurlOpt.SslKey, opts.cert.key);
     }
-    if (opts.referer) {
-        curl.setOptString(CurlOpt.Referer, opts.referer);
-    }
-    if (opts.acceptEncoding) {
-        curl.setOptString(CurlOpt.AcceptEncoding, opts.acceptEncoding);
-    } else {
-        curl.setOptString(CurlOpt.AcceptEncoding, '');
+
+    // 只有在没有指纹时才设置 HTTP 版本
+    if (!opts.impersonate && !opts.httpVersion) {
+        curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version('v2'));
+    } else if (!opts.impersonate && opts.httpVersion) {
+        curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version(opts.httpVersion));
     }
 
-    curl.setOptBool(CurlOpt.FollowLocation, opts.allowRedirects ?? true);
-    if (opts.allowRedirects !== false) {
-        curl.setOptLong(CurlOpt.MaxRedirs, opts.maxRedirects ?? 5);
-    }
+    // 删除这段重复设置的代码
+    // if (!opts.httpVersion) {
+    //     curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version('v2'));
+    // } else {
+    //     curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version(opts.httpVersion));
+    // }
 
-    //指纹
-    if (opts.impersonate) {
-        curl.impersonate(opts.impersonate, opts.defaultHeaders ?? true);
-    }
-    // extra_fp
-    // ja3 string
-    // akamai string
-    // ...
-    // http_version, after impersonate, which will change this to http2
-    if (opts.httpVersion) {
-        curl.setOptLong(CurlOpt.HttpVersion, opts.httpVersion);
-    }
+    // 删除重复的 interface 设置
     if (opts.interface) {
         curl.setOptString(CurlOpt.Interface, opts.interface);
     }
@@ -181,6 +178,23 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
                 break;
         }
     }
+
+    //添加keepalive
+    if (opts.keepAlive === false && !opts.curl) {
+        curl.setOptLong(CurlOpt.TcpKeepAlive, 0);
+        //使用新连接
+        curl.setOptLong(CurlOpt.FreshConnect, 1);
+    }
+
+    if (opts.dev) {
+        curl.setOptLong(CurlOpt.Verbose, 1);
+        // curl.setOptLong(CurlOpt.Header, 1);
+        // curl.setOptLong(CurlOpt.NoProgress, 0);
+    }
+    //指纹 - 移到最后设置
+    if (opts.impersonate) {
+        curl.impersonate(opts.impersonate, opts.defaultHeaders ?? true);
+    }
     // since 0 is a valid value to disable it
     curl.setOptLong(CurlOpt.MaxRecvSpeedLarge, opts.maxRecvSpeed ?? 0);
     //参数
@@ -198,6 +212,9 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
             }
         }
     }
+    //设置证书
+    curl.setOptString(CurlOpt.CaInfo, certPath);
+    curl.setOptString(CurlOpt.ProxyCaInfo, certPath);
 }
 
 

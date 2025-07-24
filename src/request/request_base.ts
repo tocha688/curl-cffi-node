@@ -1,7 +1,7 @@
-import { CurlMOpt } from "@tocha688/libcurl";
+import { Curl, CurlMOpt } from "@tocha688/libcurl";
 import { CurlMultiImpl, requestSync } from "../impl";
 import { CurlOptions, CurlResponse, defaultRequestOption, RequestOptions } from "../type";
-import _ from "lodash";
+import _, { method } from "lodash";
 
 type RequestData = Record<string, any> | string | URLSearchParams;
 
@@ -17,8 +17,16 @@ export class CurlRequestImplBase {
         throw new Error("Method not implemented.");
     }
 
-    private beforeRequest(options: RequestOptions): Promise<CurlResponse> {
-        return this.request(_.merge({}, this.baseOptions, options));
+    private async beforeRequest(options: RequestOptions): Promise<CurlResponse> {
+        const opts = _.merge({}, this.baseOptions, options)
+        if (opts.cors) {
+            //先预检
+            const res = await this.request(_.merge({}, opts, {
+                method: "OPTIONS"
+            }));
+            opts.curl = res.curl
+        }
+        return this.request(opts);
     }
 
     get(url: string, options?: RequestOptions): Promise<CurlResponse> {
@@ -95,9 +103,9 @@ export class CurlRequestBase extends CurlRequestImplBase {
         // } else {
         //     this.multi.setOptLong(CurlMOpt.Pipelining, 2)
         // }
-        this.multi.setOptLong(CurlMOpt.Pipelining, 2)
-        this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
-        this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 500);
+        // this.multi.setOptLong(CurlMOpt.Pipelining, 2)
+        // this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
+        // this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 500);
     }
     async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;

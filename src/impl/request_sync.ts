@@ -3,14 +3,14 @@ import { parseResponse, setRequestOptions } from "../helper";
 import { CurlResponse, defaultRequestOption, RequestOptions } from "../type";
 
 export function requestSync(options: RequestOptions): CurlResponse {
-    const curl = new Curl();
+    const curl = options.curl ?? new Curl();
     try {
         //合并默认
         options = {
             ...defaultRequestOption,
             ...options
         }
-        setRequestOptions(curl, options);
+        if (options.curl) options.curl.reset()
         curl.perform();
         return parseResponse(curl, options);
     } finally {

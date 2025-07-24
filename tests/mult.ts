@@ -2,7 +2,7 @@ import { Curl } from "@tocha688/libcurl"
 import { req, CurlClient, Logger } from "../src"
 import { CookieJar } from "tough-cookie";
 
-// Logger.level= 4; // 设置日志级别为 debug
+Logger.level= 4; // 设置日志级别为 debug
 
 const watis = [] as Array<Promise<any>>;
 console.time('request');

@@ -1,7 +1,7 @@
 import { CookieJar } from "tough-cookie";
 import { HttpHeaders } from "./header";
 import { CURL_IMPERSONATE } from "./const";
-import { CurlHttpVersion, CurlMulti, CurlOpt } from "@tocha688/libcurl";
+import { Curl, CurlHttpVersion, CurlMulti, CurlOpt } from "@tocha688/libcurl";
 import { CurlResponse, defaultRequestOption } from ".";
 import { CurlMultiImpl } from "../impl";
 
@@ -11,12 +11,12 @@ export type RequestAuth = {
 }
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | string;
-export type HttpVersion = CurlHttpVersion;
 export type RequestCert = {
     key: string;
     cert: string;
 }
 export type IpType = 'ipv4' | 'ipv6' | 'auto';
+export type HttpVersion = "v1" | "v2" | "v3" | "v3only" | "v2tls" | "v2_prior_knowledge";
 
 export type RequestOptions = {
     method?: RequestMethod;
@@ -37,7 +37,7 @@ export type RequestOptions = {
     akamai?: string;
     defaultHeaders?: boolean;
     defaultEncoding?: string;
-    httpVersion?: HttpVersion;
+    httpVersion?: HttpVersion | number;
     interface?: string;
     cert?: string | RequestCert;
     verify?: boolean;
@@ -47,6 +47,9 @@ export type RequestOptions = {
     impl?: CurlMultiImpl;
     retryCount?: number;
     keepAlive?: boolean;
+    dev?: boolean;
+    cors?: boolean;
+    curl?: Curl
 }
 
 export type CurlOptions = RequestOptions & {

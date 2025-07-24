@@ -1,4 +1,4 @@
-import { Curl, CurlMulti, AsyncEventLoop, CurlInfo } from "@tocha688/libcurl"
+import { Curl, CurlMulti, CurlInfo } from "@tocha688/libcurl"
 import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
@@ -30,7 +30,6 @@ export class CurlMultiTimer extends CurlMulti {
     private forceTimeoutTimer: NodeJS.Timeout | null = null;
     private timers: Array<NodeJS.Timeout> = [];
     curls: Map<string, CurlData> = new Map();
-    private loop: AsyncEventLoop = new AsyncEventLoop();
     private sockfds: Set<number> = new Set();
 
     constructor() {
@@ -126,8 +125,8 @@ export class CurlMultiTimer extends CurlMulti {
 
     async request(ops: RequestOptions): Promise<any> {
         return new Promise((resolve, reject) => {
-            const curl = new Curl();
-            setRequestOptions(curl, ops);
+            const curl = ops.curl ?? new Curl();
+            if (ops.curl) ops.curl.reset()
             this.curls.set(curl.id(), {
                 options: ops,
                 curl,
@@ -158,11 +157,6 @@ export class CurlMultiTimer extends CurlMulti {
         }
 
         super.close();
-        //清理事件
-        this.sockfds.forEach((sockfd) => {
-            this.loop.removeReader(sockfd);
-            this.loop.removeWriter(sockfd);
-        });
         this.sockfds.clear();
         //清理timers
         this.timers.forEach((timer) => clearTimeout(timer));
