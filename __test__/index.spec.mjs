@@ -1,5 +1,5 @@
 import test from 'ava'
-import { libVersion, libPath, gimpl } from "../dist/index.mjs"
+import { libVersion, libPath } from "../dist/index.mjs"
 
 test('getVersion should return a valid version string', async (t) => {
     // 添加调试信息
@@ -25,7 +25,6 @@ test('getVersion should return a valid version string', async (t) => {
 
 // 添加测试后的清理
 test.after.always(() => {
-    gimpl.close();
     setTimeout(() => {
         process.exit(0)
     }, 50)
