@@ -15,7 +15,7 @@ export function requestSync(options: RequestOptions): CurlResponse {
         curl.performSync();
         return parseResponse(curl, options);
     } finally {
-        curl.close();
+        // curl.close();
     }
 }
 
@@ -32,6 +32,6 @@ export async function request(options: RequestOptions): Promise<CurlResponse> {
         await curl.perform();
         return parseResponse(curl, options);
     } finally {
-        curl.close();
+        // curl.close();
     }
 }

@@ -18,15 +18,21 @@ export class CurlRequestImplBase {
     }
 
     private async beforeRequest(options: RequestOptions): Promise<CurlResponse> {
-        const opts = _.merge({}, this.baseOptions, options)
-        if (opts.cors) {
-            //先预检
-            const res = await this.request(_.merge({}, opts, {
-                method: "OPTIONS"
-            }));
-            opts.curl = res.curl
+        let result: CurlResponse | undefined;
+        try {
+            const opts = _.merge({}, this.baseOptions, options)
+            if (opts.cors) {
+                //先预检
+                const res = await this.request(_.merge({}, opts, {
+                    method: "OPTIONS"
+                }));
+                opts.curl = res.curl
+            }
+            result = await this.request(opts);
+        } finally {
+            result?.curl?.close();
         }
-        return this.request(opts);
+        return result;
     }
 
     get(url: string, options?: RequestOptions): Promise<CurlResponse> {
