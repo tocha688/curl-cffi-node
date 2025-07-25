@@ -64,7 +64,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@tocha688/libcurl": "link:..\\libcurl-impersonate-node-napi",
+    "@tocha688/libcurl": "^0.1.5",
     "@types/lodash": "^4.17.17",
     "lodash": "^4.17.21",
     "tar": "^7.4.3",
