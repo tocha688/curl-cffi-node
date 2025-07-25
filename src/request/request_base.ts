@@ -1,5 +1,5 @@
 import { Curl, CurlMOpt } from "@tocha688/libcurl";
-import { CurlMultiImpl, requestSync } from "../impl";
+import { CurlMultiImpl, request, requestSync } from "../impl";
 import { CurlOptions, CurlResponse, defaultRequestOption, RequestOptions } from "../type";
 import _, { method } from "lodash";
 
@@ -107,17 +107,21 @@ export class CurlRequestBase extends CurlRequestImplBase {
         this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
         this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 500);
     }
-    async request(options: RequestOptions): Promise<CurlResponse> {
+
+    protected async send(options: RequestOptions): Promise<CurlResponse> {
+        if (this.multi) {
+            return await this.multi.request(options);
+        } else {
+            return await request(options);
+        }
+    }
+
+    override async request(options: RequestOptions): Promise<CurlResponse> {
         let retryCount = this.baseOptions?.retryCount ?? 0;
         let result: CurlResponse | undefined;
         do {
             try {
-                if (this.multi) {
-                    result = await this.multi.request(options);
-                } else {
-                    //同步
-                    result = await requestSync(options);
-                }
+                result = await this.send(options);
             } catch (e) {
                 if (retryCount <= 0) {
                     throw e;
@@ -138,3 +142,4 @@ export class CurlRequestBase extends CurlRequestImplBase {
         return this.multi;
     }
 }
+

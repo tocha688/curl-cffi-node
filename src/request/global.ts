@@ -1,14 +1,16 @@
+import { globalCleanup } from "@tocha688/libcurl";
 import { curlGlobalInit, CurlMultiImpl } from "../impl";
 import { CurlClient } from "./request";
 
 curlGlobalInit();
 //@ts-ignore
-export const gimpl: CurlMultiImpl = global.gimpl = global.gimpl ?? new CurlMultiImpl();
-export const req = new CurlClient({ impl: gimpl });
+// export const gimpl: CurlMultiImpl = global.gimpl = global.gimpl ?? new CurlMultiImpl();
+export const req = new CurlClient();
 
 // 监听多个退出事件
 const cleanup = () => {
-    gimpl.close();
+    req.close();
+    globalCleanup();
 };
 
 process.on("exit", cleanup);

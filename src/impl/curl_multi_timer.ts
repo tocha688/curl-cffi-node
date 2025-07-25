@@ -54,15 +54,19 @@ export class CurlMultiTimer extends CurlMulti {
      */
     private setupCallbacks(): void {
         Logger.debug('setupCallbacks - setTimerCallback');
-        this.setTimerCallback(({ timeout_ms }) => {
-            if (timeout_ms == -1) {
+        this.setTimerCallback((err, { timeoutMs }) => {
+            if (err) {
+                Logger.error(err)
+                return;
+            }
+            if (timeoutMs == -1) {
                 this.timers.forEach((timer) => clearTimeout(timer));
                 this.timers = [];
             } else {
                 this.timers.push(setTimeout(() => {
-                    Logger.debug('CurlMultiTimer - setTimerCallback - timeout', timeout_ms);
+                    Logger.debug('CurlMultiTimer - setTimerCallback - timeout', timeoutMs);
                     this.processData();
-                }, timeout_ms));
+                }, timeoutMs));
             }
         });
     }
@@ -125,8 +129,8 @@ export class CurlMultiTimer extends CurlMulti {
 
     async request(ops: RequestOptions): Promise<any> {
         return new Promise((resolve, reject) => {
-             const curl = ops.curl ?? new Curl();
-            if(ops.curl)ops.curl.reset()
+            const curl = ops.curl ?? new Curl();
+            if (ops.curl) ops.curl.reset()
             setRequestOptions(curl, ops);
             this.curls.set(curl.id(), {
                 options: ops,

@@ -48,7 +48,7 @@ export class CurlMultiEvent extends CurlMulti {
         this.forceTimeoutTimer = setInterval(() => {
             if (this.closed) return;
             Logger.debug('Force timeout triggered');
-            this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
+            this.socketAction(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
         }, 1000);
 
         // 不阻塞进程退出
@@ -57,7 +57,11 @@ export class CurlMultiEvent extends CurlMulti {
 
     private setupCallbacks(): void {
         Logger.debug('setupCallbacks - setSocketCallback and setTimerCallback');
-        this.setSocketCallback(({ curl_id, sockfd, what }) => {
+        this.setSocketCallback((err, { curlId, sockfd, what }) => {
+            if (err != null) {
+                Logger.error(err)
+                return
+            }
             Logger.debug(`CurlMultiEvent - socketCallback: sockfd=${sockfd}, what=${what}`);
 
             // 先清理现有的监听
@@ -94,16 +98,20 @@ export class CurlMultiEvent extends CurlMulti {
 
         });
 
-        this.setTimerCallback(({ timeout_ms }) => {
-            Logger.debug(`CurlMultiEvent - timerCallback: timeout_ms=${timeout_ms}`);
-            if (timeout_ms == -1) {
+        this.setTimerCallback((err,{ timeoutMs }) => {
+            if (err != null) {
+                Logger.error(err)
+                return
+            }
+            Logger.debug(`CurlMultiEvent - timerCallback: timeout_ms=${timeoutMs}`);
+            if (timeoutMs == -1) {
                 this.timers.forEach((timer) => clearTimeout(timer));
                 this.timers.clear();
             } else {
                 const timer = setTimeout(() => {
                     this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
                     this.timers.delete(timer);
-                }, timeout_ms);
+                }, timeoutMs);
                 this.timers.add(timer);
             }
         });
@@ -154,7 +162,7 @@ export class CurlMultiEvent extends CurlMulti {
     async request(ops: RequestOptions): Promise<CurlResponse> {
         return new Promise((resolve, reject) => {
             const curl = ops.curl ?? new Curl();
-            if(ops.curl)ops.curl.reset()
+            if (ops.curl) ops.curl.reset()
             setRequestOptions(curl, ops);
             this.curls.set(curl.id(), {
                 options: ops,

@@ -22,16 +22,21 @@ export type RequestOptions = {
     method?: RequestMethod;
     url?: string;
     params?: Record<string, any>;
-    data?: Record<string, any> | string;
+    //请求数据
+    data?: Record<string, any> | string | null;
+    //cookie jar
     jar?: CookieJar;
+    //请求头
     headers?: Record<string, string>;
     auth?: RequestAuth;
     timeout?: number;
     allowRedirects?: boolean;
     maxRedirects?: number;
+    //代理 http://username:password@host:port
     proxy?: string;
     referer?: string;
     acceptEncoding?: string;
+    //开启curl指纹
     impersonate?: CURL_IMPERSONATE;
     ja3?: string;
     akamai?: string;
@@ -44,12 +49,22 @@ export type RequestOptions = {
     maxRecvSpeed?: number;
     curlOptions?: Record<CurlOpt, string | number | boolean>;
     ipType?: IpType;
+    //开启multi，这将复用请求，默认不会复用
     impl?: CurlMultiImpl;
+    //自动重试次数，默认0
     retryCount?: number;
     keepAlive?: boolean;
+    //开启curl日志
     dev?: boolean;
+    //模拟浏览器跨域请求
     cors?: boolean;
     curl?: Curl
+}
+
+export type FetchOptions = RequestOptions & {
+    body?: string | Record<string, any> | null;
+    //同步
+    sync?: boolean;
 }
 
 export type CurlOptions = RequestOptions & {

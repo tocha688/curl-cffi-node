@@ -37,18 +37,18 @@ npm install curl-cffi
 ### 简单请求
 
 ```javascript
-const { req } = require('curl-cffi');
+const { req } = require("curl-cffi");
 
 // 异步请求
 async function makeGetRequest() {
   try {
-    const response = await req.get('https://api.example.com/data', {
-      impersonate: 'chrome136' // 模拟 Chrome 136
+    const response = await req.get("https://api.example.com/data", {
+      impersonate: "chrome136", // 模拟 Chrome 136
     });
-    console.log('状态码:', response.statusCode);
-    console.log('响应数据:', response.data);
+    console.log("状态码:", response.statusCode);
+    console.log("响应数据:", response.data);
   } catch (error) {
-    console.error('请求失败:', error);
+    console.error("请求失败:", error);
   }
 }
 
@@ -61,28 +61,99 @@ curl-cffi 支持同步和异步请求模式：
 
 ```javascript
 // 同步请求
-const { CurlRequestSync } = require('curl-cffi');
-const syncCurl = new CurlRequestSync();
+const { CurlRequestSync, CurlRequest, CurlMultiImpl } = require("curl-cffi");
+const req = new CurlRequestSync();
 
-// 基于事件的异步请求实现
-const { CurlRequest } = require('curl-cffi');
-const asyncCurl = new CurlRequest();
+// 异步请求实现
+const req2 = new CurlRequest();
 
-// 基于定时器的异步请求实现
-const { CurlRequestLoop } = require('curl-cffi');
-const loopCurl = new CurlRequestLoop();
+// 基于multi的异步请求
+const req3 = new CurlClient({
+  //启用multi请求，这将复用请求，默认不会复用
+  impl: new CurlMultiImpl(),
+});
 ```
 
 ### 会话管理
 
 ```javascript
 // 会话请求
-const req1=new CurlSession()
-// 基于事件的异步请求实现
-const req2=new CurlSessionSync()
-// 基于定时器的异步请求实现
-const req3=new CurlSessionLoop()
+const req1 = new CurlSession();
+// 异步请求 不复用连接
+const req2 = new CurlSessionSync();
 ```
+
+### 请求参数
+
+```javascript
+type RequestOptions = {
+  method?: RequestMethod,
+  url?: string,
+  params?: Record<string, any>,
+  //请求数据
+  data?: Record<string, any> | string | null,
+  //cookie jar
+  jar?: CookieJar,
+  //请求头
+  headers?: Record<string, string>,
+  auth?: RequestAuth,
+  timeout?: number,
+  allowRedirects?: boolean,
+  maxRedirects?: number,
+  //代理 http://username:password@host:port
+  proxy?: string,
+  referer?: string,
+  acceptEncoding?: string,
+  //开启curl指纹
+  impersonate?: CURL_IMPERSONATE,
+  ja3?: string,
+  akamai?: string,
+  defaultHeaders?: boolean,
+  defaultEncoding?: string,
+  httpVersion?: HttpVersion | number,
+  interface?: string,
+  cert?: string | RequestCert,
+  verify?: boolean,
+  maxRecvSpeed?: number,
+  curlOptions?: Record<CurlOpt, string | number | boolean>,
+  ipType?: IpType,
+  //开启multi，这将复用请求，默认不会复用
+  impl?: CurlMultiImpl,
+  //自动重试次数，默认0
+  retryCount?: number,
+  keepAlive?: boolean,
+  //开启curl日志
+  dev?: boolean,
+  //模拟浏览器跨域请求
+  cors?: boolean,
+  curl?: Curl,
+};
+```
+
+### 响应参数
+
+```javascript
+type CurlResponse={
+  url: string，
+  status: number，
+  dataRaw?: Buffer，
+  headers: HttpHeaders，
+  request: CurlRequestInfo，
+  options: RequestOptions，
+  //请求堆栈，包含了自动重定向的内容
+  stacks: Array<CurlRequestInfo> = []，
+  index: number = 0，
+  redirects: number = 0，
+  curl: Curl，
+  jar:CookieJar,
+  //响应内容的文本格式
+  text:string,
+  //如果响应json则自动解析，否则
+  data:any|string|Buffer,
+}
+```
+
+
 
 ### 性能优化
 
@@ -94,7 +165,6 @@ const req1=new CurlSession({impl:gimpl})
 ## 许可证
 
 本项目采用 MIT 许可证 - 详情请参阅 LICENSE 文件。
-
 
 **启发** [curl_cffi](https://github.com/lexiforest/curl_cffi)  
 **libcurl** [curl-impersonate](https://github.com/lexiforest/curl-impersonate)
