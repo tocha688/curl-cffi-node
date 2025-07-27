@@ -67,8 +67,9 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
             //如果有cookie头，则不使用jar
             if (cookieHeader) {
                 cookieHeader.split(';').forEach(cookie => {
+                    if (!cookie?.trim()) return;
                     const [key, value] = cookie.split('=');
-                    cookies.set(key.trim(), value.trim());
+                    cookies.set(key.trim(), (value ?? "").trim());
                 });
             }
         }
