@@ -98,7 +98,7 @@ export class CurlMultiEvent extends CurlMulti {
 
         });
 
-        this.setTimerCallback((err,{ timeoutMs }) => {
+        this.setTimerCallback((err, { timeoutMs }) => {
             if (err != null) {
                 Logger.error(err)
                 return
@@ -159,11 +159,8 @@ export class CurlMultiEvent extends CurlMulti {
         }
     }
 
-    async request(ops: RequestOptions): Promise<CurlResponse> {
+    async request(ops: RequestOptions, curl: Curl): Promise<CurlResponse> {
         return new Promise((resolve, reject) => {
-            const curl = ops.curl ?? new Curl();
-            if (ops.curl) ops.curl.reset()
-            setRequestOptions(curl, ops);
             this.curls.set(curl.id(), {
                 options: ops,
                 curl,

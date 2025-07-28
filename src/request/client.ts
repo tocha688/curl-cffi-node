@@ -1,7 +1,7 @@
 import { Curl, CurlMOpt } from "@tocha688/libcurl";
 import { CurlMultiImpl, request, requestSync } from "../impl";
 import { CurlOptions, CurlResponse, defaultRequestOption, RequestEvent, RequestOptions, ResponseEvent } from "../type";
-import _, { method } from "lodash";
+import _ from "lodash";
 import { setRequestOptions } from "../helper";
 
 type RequestData = Record<string, any> | string | URLSearchParams;
@@ -86,6 +86,7 @@ export class CurlClient extends CurlRequestImplBase {
     private multi?: CurlMultiImpl;
     constructor(ops?: CurlOptions) {
         super(ops);
+        ops = _.merge({}, defaultRequestOption, ops);
         this.multi = ops?.impl;
         this.initOptions(ops);
     }
@@ -161,7 +162,7 @@ export class CurlClient extends CurlRequestImplBase {
                 //重置curl
                 curl.reset();
                 //初始化参数
-                await setRequestOptions(curl, options);
+                await setRequestOptions(curl, opts);
                 //调用参数
                 await this.emits(options, this.reqs);
                 result = await this.send(options, curl);
