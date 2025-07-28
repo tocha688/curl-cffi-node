@@ -155,7 +155,7 @@ export class CurlClient extends CurlRequestImplBase {
             await this.send(corsOpts, curl);
         }
         //其他正常请求
-        let retryCount = this.baseOptions?.retryCount ?? 0;
+        let retryCount = opts?.retryCount ?? 0;
         let result: CurlResponse | undefined;
         do {
             try {
@@ -164,8 +164,8 @@ export class CurlClient extends CurlRequestImplBase {
                 //初始化参数
                 await setRequestOptions(curl, opts);
                 //调用参数
-                await this.emits(options, this.reqs);
-                result = await this.send(options, curl);
+                await this.emits(opts, this.reqs);
+                result = await this.send(opts, curl);
                 //成功退出
                 break;
             } catch (e) {
@@ -178,7 +178,7 @@ export class CurlClient extends CurlRequestImplBase {
         } while (retryCount-- > 0);
         //调用响应
         await this.emits(result as CurlResponse, this.resps);
-        return this.beforeResponse(options, curl, result as CurlResponse);
+        return this.beforeResponse(opts, curl, result as CurlResponse);
     }
 
     close() {
