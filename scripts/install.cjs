@@ -88,7 +88,7 @@ async function loadLibs() {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
         }
     }).then(x => x.json());
-    console.log(JSON.stringify(releases, null, 2));
+    // console.log(JSON.stringify(releases, null, 2));
     const target = releases?.[0]?.assets?.find(x => x.name.startsWith("libcurl-impersonate-") && x.name.endsWith(`${dirName}.tar.gz`));
     let url = target?.browser_download_url;
     if (!url) {
