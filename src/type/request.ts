@@ -54,11 +54,12 @@ export type RequestOptions = {
     //自动重试次数，默认0
     retryCount?: number;
     keepAlive?: boolean;
+    sync?: boolean;
     //开启curl日志
     dev?: boolean;
     //模拟浏览器跨域请求
     cors?: boolean;
-    curl?: Curl
+    // curl?: Curl
 }
 
 export type FetchOptions = RequestOptions & {
@@ -76,6 +77,9 @@ export type CurlRequestInfo = RequestOptions & {
     // request?: CurlRequest;
     response: CurlResponse;
 }
+
+export type RequestEvent = (options: RequestOptions) => Promise<RequestOptions>;
+export type ResponseEvent = (options: CurlResponse) => Promise<CurlResponse>;
 
 export interface CurlRequestimpl {
     request(options: RequestOptions): Promise<CurlResponse>;

@@ -1,6 +1,6 @@
 import { globalCleanup } from "@tocha688/libcurl";
 import { curlGlobalInit, CurlMultiImpl } from "../impl";
-import { CurlClient } from "./request";
+import { CurlClient } from "./client";
 
 curlGlobalInit();
 //@ts-ignore

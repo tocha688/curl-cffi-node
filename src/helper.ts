@@ -5,7 +5,7 @@ import { buildUrl, normalize_http_version, parseResponseHeaders } from "./utils"
 import _ from "lodash";
 
 
-export function setRequestOptions(curl: Curl, opts: RequestOptions) {
+export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = false) {
     //合并
     opts = { ...defaultRequestOption, ...opts };
     const currentUrl = buildUrl(opts.url as string, opts.params);
@@ -191,7 +191,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions) {
     }
 
     //添加keepalive
-    if (opts.keepAlive === false && !opts.curl) {
+    if (opts.keepAlive === false && isCors === false) {
         curl.setOptLong(CurlOpt.TcpKeepAlive, 0);
         //使用新连接
         curl.setOptLong(CurlOpt.FreshConnect, 1);

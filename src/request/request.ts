@@ -1,23 +1,18 @@
+import { Curl } from "@tocha688/libcurl";
 import { CurlMultiImpl, request, requestSync } from "../impl";
 import { CurlResponse, FetchOptions, RequestOptions } from "../type";
-import { CurlRequestBase } from "./request_base";
+import { setRequestOptions } from "../helper";
 
-//同步方法
-export class CurlClientSync extends CurlRequestBase {
-    override async send(options: RequestOptions): Promise<CurlResponse> {
-        return await requestSync(options);
-    }
-}
-
-export class CurlClient extends CurlRequestBase { }
 
 export async function fetch(url: string, options: FetchOptions = {}): Promise<CurlResponse> {
     options.url = url;
     options.data = options.body;
+    let curl = new Curl();
+    setRequestOptions(curl, options);
     if (options.sync) {
-        return await requestSync(options);
+        return await requestSync(options, curl);
     }
-    return await request(options);
+    return await request(options, curl);
 }
 
 

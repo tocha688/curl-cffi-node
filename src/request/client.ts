@@ -1,9 +1,11 @@
 import { Curl, CurlMOpt } from "@tocha688/libcurl";
 import { CurlMultiImpl, request, requestSync } from "../impl";
-import { CurlOptions, CurlResponse, defaultRequestOption, RequestOptions } from "../type";
+import { CurlOptions, CurlResponse, defaultRequestOption, RequestEvent, RequestOptions, ResponseEvent } from "../type";
 import _, { method } from "lodash";
+import { setRequestOptions } from "../helper";
 
 type RequestData = Record<string, any> | string | URLSearchParams;
+
 
 export class CurlRequestImplBase {
     constructor(
@@ -17,22 +19,8 @@ export class CurlRequestImplBase {
         throw new Error("Method not implemented.");
     }
 
-    private async beforeRequest(options: RequestOptions): Promise<CurlResponse> {
-        let result: CurlResponse | undefined;
-        try {
-            const opts = _.merge({}, this.baseOptions, options)
-            if (opts.cors) {
-                //先预检
-                const res = await this.request(_.merge({}, opts, {
-                    method: "OPTIONS"
-                }));
-                opts.curl = res.curl
-            }
-            result = await this.request(opts);
-        } finally {
-            result?.curl?.close();
-        }
-        return result;
+    protected async beforeRequest(options: RequestOptions): Promise<CurlResponse> {
+        return this.request(options);
     }
 
     get(url: string, options?: RequestOptions): Promise<CurlResponse> {
@@ -94,12 +82,31 @@ export class CurlRequestImplBase {
     }
 }
 
-export class CurlRequestBase extends CurlRequestImplBase {
+export class CurlClient extends CurlRequestImplBase {
     private multi?: CurlMultiImpl;
     constructor(ops?: CurlOptions) {
         super(ops);
         this.multi = ops?.impl;
         this.initOptions(ops);
+    }
+
+    private reqs: Array<RequestEvent> = [];
+    private resps: Array<ResponseEvent> = [];
+    private async emits<T>(options: T, calls: Array<(data: T) => Promise<T>>): Promise<T> {
+        for (const call of calls) {
+            options = await call(options);
+        }
+        return options;
+    }
+    onRequest(event: RequestEvent) {
+        if (this.reqs.indexOf(event) === -1) {
+            this.reqs.push(event);
+        }
+    }
+    onResponse(event: ResponseEvent) {
+        if (this.resps.indexOf(event) === -1) {
+            this.resps.push(event);
+        }
     }
     private initOptions(ops?: CurlOptions) {
         if (!ops) return;
@@ -114,20 +121,52 @@ export class CurlRequestBase extends CurlRequestImplBase {
         this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 500);
     }
 
-    protected async send(options: RequestOptions): Promise<CurlResponse> {
+    protected async send(options: RequestOptions, curl: Curl): Promise<CurlResponse> {
         if (this.multi) {
-            return await this.multi.request(options);
+            return await this.multi.request(options, curl);
+        } else if (options.sync) {
+            return await requestSync(options, curl);
         } else {
-            return await request(options);
+            return await request(options, curl);
         }
     }
 
+    protected getCurl(): Curl {
+        return new Curl();
+    }
+
+    protected async beforeResponse(options: RequestOptions, curl: Curl, res: CurlResponse): Promise<CurlResponse> {
+        curl.close();
+        return res;
+    }
+
     override async request(options: RequestOptions): Promise<CurlResponse> {
+        let curl = this.getCurl();
+        //cors
+        const opts = _.merge({}, this.baseOptions, options)
+        if (opts.cors) {
+            //先预检
+            const corsOpts = _.merge({}, opts, {
+                method: "OPTIONS"
+            })
+            //初始化请求
+            await setRequestOptions(curl, corsOpts);
+            await this.send(corsOpts, curl);
+        }
+        //其他正常请求
         let retryCount = this.baseOptions?.retryCount ?? 0;
         let result: CurlResponse | undefined;
         do {
             try {
-                result = await this.send(options);
+                //重置curl
+                curl.reset();
+                //初始化参数
+                await setRequestOptions(curl, options);
+                //调用参数
+                await this.emits(options, this.reqs);
+                result = await this.send(options, curl);
+                //成功退出
+                break;
             } catch (e) {
                 if (retryCount <= 0) {
                     throw e;
@@ -136,8 +175,11 @@ export class CurlRequestBase extends CurlRequestImplBase {
                 console.warn(`Request failed, retrying... (${retryCount} retries left)`, e);
             }
         } while (retryCount-- > 0);
-        return result as CurlResponse;
+        //调用响应
+        await this.emits(result as CurlResponse, this.resps);
+        return this.beforeResponse(options, curl, result as CurlResponse);
     }
+
     close() {
         this.multi?.close();
     }

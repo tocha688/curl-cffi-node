@@ -127,11 +127,8 @@ export class CurlMultiTimer extends CurlMulti {
         }
     }
 
-    async request(ops: RequestOptions): Promise<any> {
+    async request(ops: RequestOptions, curl: Curl): Promise<any> {
         return new Promise((resolve, reject) => {
-            const curl = ops.curl ?? new Curl();
-            if (ops.curl) ops.curl.reset()
-            setRequestOptions(curl, ops);
             this.curls.set(curl.id(), {
                 options: ops,
                 curl,
