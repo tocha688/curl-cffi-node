@@ -43,9 +43,7 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
         body = ""
     }
     if (body || ["POST", "PUT", "PATCH"].includes(method)) {
-        const data = Buffer.from(body)
-        curl.setOptBuffer(CurlOpt.PostFields, data);
-        curl.setOptLong(CurlOpt.PostFieldSize, data.length);
+        curl.setBodyString(body);
         if (method == "GET") {
             curl.setOptString(CurlOpt.CustomRequest, method);
         }

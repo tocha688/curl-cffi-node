@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@tocha688/libcurl':
-        specifier: ^0.1.5
-        version: 0.1.15
+        specifier: ^0.1.16
+        version: 0.1.16
       '@types/lodash':
         specifier: ^4.17.17
         version: 4.17.17
@@ -352,80 +352,80 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@tocha688/libcurl-android-arm-eabi@0.1.15':
-    resolution: {integrity: sha512-huPv1qTZWHYMJhS9MZi4SEL9ABBhdPFz5yL7ki//cS4ZCKl/2ENaKaSvbJp5EngAh4Q11WTN0+7kyrxW1m1s0Q==}
+  '@tocha688/libcurl-android-arm-eabi@0.1.16':
+    resolution: {integrity: sha512-+QWYDco9kYMCSBN+E/33Pey/wHejMzkz+XWmnnY8A0alwdRlgDpBN8BAulSh+RokJpykHNLGptqDs5YtZsD+QQ==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [arm]
     os: [android]
 
-  '@tocha688/libcurl-darwin-arm64@0.1.15':
-    resolution: {integrity: sha512-VtlctxPmLQYemNgTTiIz6ATXiqua5H1LJS0c0CJucnjDPkZRgcxpH65pN2eaxRr327mrxtQn/M2bnMDW4uaLhg==}
+  '@tocha688/libcurl-darwin-arm64@0.1.16':
+    resolution: {integrity: sha512-IXPXO7JMfQyBY0eYMxDDcDO+I5URftxm1k53Voty9qwmVoW3ysLc4iz9a3Pn/OVtkGCsFyzkb9QT5zE2J4JCBw==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tocha688/libcurl-darwin-x64@0.1.15':
-    resolution: {integrity: sha512-RFBTDI+HkdblEaQSL3sMB9i9ECAOGrW7UOYjgJCPwv2OJpgXl3Z2fY/vosfaclsDHYA6Axa8bEVEWOVqd5185Q==}
+  '@tocha688/libcurl-darwin-x64@0.1.16':
+    resolution: {integrity: sha512-myQ+vdYxF2Yi9px1yAdr6K689tDnwAAt65KiXLVS0cAf1pyxLyfbjqhZbe2jvJ8rO5va4otrOK1ty0+UHB4vdw==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tocha688/libcurl-freebsd-x64@0.1.15':
-    resolution: {integrity: sha512-RduZfqvwmFp41h4P1WAB9cH7pAxANhyMAZ9SQ1d+7P7oVZOTnGAPHorKF13r19O9v4ZD7JV87Bjibuw2bsgsqQ==}
+  '@tocha688/libcurl-freebsd-x64@0.1.16':
+    resolution: {integrity: sha512-gi+pyUnDAGSjSCFrMiE1pFFEAO/8dwWF8fsuuXHqQvhB5ebSdmRlKVXligW4o0Vrh3AIgrpK4PRHzNuCPlthoQ==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [x64]
     os: [freebsd]
 
-  '@tocha688/libcurl-linux-arm-gnueabihf@0.1.15':
-    resolution: {integrity: sha512-0cCmQ3K5x+MjN0NHorQtSkDAsMNQOB78tAw50HNo04cdr0i0J6dJJvVqk4FOi6XqLoeZ6hsElVCxGo9IQY2qrw==}
+  '@tocha688/libcurl-linux-arm-gnueabihf@0.1.16':
+    resolution: {integrity: sha512-y2S1IKg5mp1Ty8H5SpcuUnY70FcbucGp/cuSRf4os2bXNN1FFl0TXX7TZinvhlX3erKMdHLjgokiLkcI7IUcpw==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [arm]
     os: [linux]
 
-  '@tocha688/libcurl-linux-arm64-gnu@0.1.15':
-    resolution: {integrity: sha512-MyHyyFH1OM7YPz0KoliHu0CnDo4QQoZZoI7XbQ0Jdo6GVrMSnOffuFtWF0s3B7lgIVicSxikiWNXeKrdIUcBtg==}
+  '@tocha688/libcurl-linux-arm64-gnu@0.1.16':
+    resolution: {integrity: sha512-20qBoGvI4CZzDw5bm13PvS4BxQV6fgU5+ihRKWYMyI5rcR1cczr4+pJXuxyZu6gsBrnbXl0BosnjN8fi/fkhMg==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@tocha688/libcurl-linux-arm64-musl@0.1.15':
-    resolution: {integrity: sha512-Metxh598q3erFF/S2Ai4H3YwI+NHEwRscin+zU4X8od90BtVZR4fhnEF4FJdTRiiZWNmTYzhIERXu6UrxOG/tQ==}
+  '@tocha688/libcurl-linux-arm64-musl@0.1.16':
+    resolution: {integrity: sha512-UH8tnw61UJkE4yhA64/HJib+WcrbwbC6mWj3l2S4RM7LYFSDp/+nIaG5xX1S1gthB2pmDydENs3RnVZVyRgiKQ==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@tocha688/libcurl-linux-x64-gnu@0.1.15':
-    resolution: {integrity: sha512-1OUJmqJHbKHfeBHTUD2RWllH+YsTJ2D44rlD3rGPGWCY29sPFH4/OpF354FdcRzKCLgms1FeYu0NNT7O+J6tSw==}
+  '@tocha688/libcurl-linux-x64-gnu@0.1.16':
+    resolution: {integrity: sha512-qRtYHrPwMQc0062QUGrcXl2j1Q5Q7c91Rclkm+7ZRqkyVuqy5rokDeVFklc/Y4QHuzd4reITYyXhVau8aHeuXg==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [x64]
     os: [linux]
 
-  '@tocha688/libcurl-linux-x64-musl@0.1.15':
-    resolution: {integrity: sha512-vYUEthdakxKvM4JbLIe9AfoeWTu9vDN6Vn/KFqcZ9td8YhbaJc2aNx//k32YoybeCMxUR3LghD5O/BCT+DIURg==}
+  '@tocha688/libcurl-linux-x64-musl@0.1.16':
+    resolution: {integrity: sha512-6EYMXbhl/sKih7A90L+ANAps/tl4Ygg7bWVQxYuKUjoKzlaNa8qd8Snr6/JSu7uYOyIVgAPdAX18mffZiNyRPw==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [x64]
     os: [linux]
 
-  '@tocha688/libcurl-win32-arm64-msvc@0.1.15':
-    resolution: {integrity: sha512-/XRcO8iGjy6ajCWeUZaqse6QL0qM8ZKH/kBbL6yQMETW2QB9xMLrNRdaVfDIDdoGOROd23jU9B+xKdGMBLHJQg==}
+  '@tocha688/libcurl-win32-arm64-msvc@0.1.16':
+    resolution: {integrity: sha512-KqxVJ0Sq6dCwAsUM8c1zNwqmiiMMr8y6dWzP9uTzJxYaFJcwwf1AmX60Kg2xBzEn6o+51u/xW9Qp+QGOto0SDw==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tocha688/libcurl-win32-ia32-msvc@0.1.15':
-    resolution: {integrity: sha512-SiCa7ZFDhNMcV1VI0zeZeV8DbjGUpHYq8MA6pIQ6n0L/gT0q2vKL4+bnNS32UfoPxs1MJiigiNvKT0NepsiXRQ==}
+  '@tocha688/libcurl-win32-ia32-msvc@0.1.16':
+    resolution: {integrity: sha512-7nA+gwAy8Ofr6s6j9NTd4CRSPv5950yU/zSTt+JfYYAiP8RudzHucsVi7LoNNEPklsxJojUXb/xa54nAf5/qdg==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [ia32]
     os: [win32]
 
-  '@tocha688/libcurl-win32-x64-msvc@0.1.15':
-    resolution: {integrity: sha512-aNTBmBvOLUQ4QxpYkPV3Ox0/6JAwuW2l+LeHA5bIWLoXASeweDLdOrnW2eji+WZptNZmeE7qWAO+EJIVqrR+sg==}
+  '@tocha688/libcurl-win32-x64-msvc@0.1.16':
+    resolution: {integrity: sha512-C9pw9lWDIsgmb1pPJEkmj2UdPFtW2HWfJr02i9OisNAN4r28DIWxh+sY9lU4PHWB+IQIBlymHlK/1TGkCmPDWA==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
     cpu: [x64]
     os: [win32]
 
-  '@tocha688/libcurl@0.1.15':
-    resolution: {integrity: sha512-xurpm2np6NEEmfBCfKIJkbHBMgDlA8KFlHgk9CgQrQx8wcg5LPOIlD1yHV3swhhkVysQ9EEri5uuMIuUUqpIeA==}
+  '@tocha688/libcurl@0.1.16':
+    resolution: {integrity: sha512-32Tl0EdF8G6OLp7xBNhL5fapcjqx6TYZR7eYYXSlx/npsNAmIQPNRPnwcJaOcF2KtymnypKmZlXyKIu/MHjXnw==}
     engines: {node: '>= 6.14.2 < 7 || >= 8.11.2 < 9 || >= 9.11.0 < 10 || >= 10.0.0'}
 
   '@types/estree@1.0.7':
@@ -1454,56 +1454,56 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@tocha688/libcurl-android-arm-eabi@0.1.15':
+  '@tocha688/libcurl-android-arm-eabi@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-darwin-arm64@0.1.15':
+  '@tocha688/libcurl-darwin-arm64@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-darwin-x64@0.1.15':
+  '@tocha688/libcurl-darwin-x64@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-freebsd-x64@0.1.15':
+  '@tocha688/libcurl-freebsd-x64@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-linux-arm-gnueabihf@0.1.15':
+  '@tocha688/libcurl-linux-arm-gnueabihf@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-linux-arm64-gnu@0.1.15':
+  '@tocha688/libcurl-linux-arm64-gnu@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-linux-arm64-musl@0.1.15':
+  '@tocha688/libcurl-linux-arm64-musl@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-linux-x64-gnu@0.1.15':
+  '@tocha688/libcurl-linux-x64-gnu@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-linux-x64-musl@0.1.15':
+  '@tocha688/libcurl-linux-x64-musl@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-win32-arm64-msvc@0.1.15':
+  '@tocha688/libcurl-win32-arm64-msvc@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-win32-ia32-msvc@0.1.15':
+  '@tocha688/libcurl-win32-ia32-msvc@0.1.16':
     optional: true
 
-  '@tocha688/libcurl-win32-x64-msvc@0.1.15':
+  '@tocha688/libcurl-win32-x64-msvc@0.1.16':
     optional: true
 
-  '@tocha688/libcurl@0.1.15':
+  '@tocha688/libcurl@0.1.16':
     optionalDependencies:
-      '@tocha688/libcurl-android-arm-eabi': 0.1.15
-      '@tocha688/libcurl-darwin-arm64': 0.1.15
-      '@tocha688/libcurl-darwin-x64': 0.1.15
-      '@tocha688/libcurl-freebsd-x64': 0.1.15
-      '@tocha688/libcurl-linux-arm-gnueabihf': 0.1.15
-      '@tocha688/libcurl-linux-arm64-gnu': 0.1.15
-      '@tocha688/libcurl-linux-arm64-musl': 0.1.15
-      '@tocha688/libcurl-linux-x64-gnu': 0.1.15
-      '@tocha688/libcurl-linux-x64-musl': 0.1.15
-      '@tocha688/libcurl-win32-arm64-msvc': 0.1.15
-      '@tocha688/libcurl-win32-ia32-msvc': 0.1.15
-      '@tocha688/libcurl-win32-x64-msvc': 0.1.15
+      '@tocha688/libcurl-android-arm-eabi': 0.1.16
+      '@tocha688/libcurl-darwin-arm64': 0.1.16
+      '@tocha688/libcurl-darwin-x64': 0.1.16
+      '@tocha688/libcurl-freebsd-x64': 0.1.16
+      '@tocha688/libcurl-linux-arm-gnueabihf': 0.1.16
+      '@tocha688/libcurl-linux-arm64-gnu': 0.1.16
+      '@tocha688/libcurl-linux-arm64-musl': 0.1.16
+      '@tocha688/libcurl-linux-x64-gnu': 0.1.16
+      '@tocha688/libcurl-linux-x64-musl': 0.1.16
+      '@tocha688/libcurl-win32-arm64-msvc': 0.1.16
+      '@tocha688/libcurl-win32-ia32-msvc': 0.1.16
+      '@tocha688/libcurl-win32-x64-msvc': 0.1.16
 
   '@types/estree@1.0.7': {}
 

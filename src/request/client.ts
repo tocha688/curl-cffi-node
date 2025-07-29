@@ -1,7 +1,7 @@
 import { Curl, CurlMOpt } from "@tocha688/libcurl";
 import { CurlMultiImpl, request, requestSync } from "../impl";
 import { CurlOptions, CurlResponse, defaultRequestOption, RequestEvent, RequestOptions, ResponseEvent } from "../type";
-import _ from "lodash";
+import _, { head } from "lodash";
 import { setRequestOptions } from "../helper";
 
 type RequestData = Record<string, any> | string | URLSearchParams;
@@ -148,7 +148,12 @@ export class CurlClient extends CurlRequestImplBase {
         if (opts.cors) {
             //先预检
             const corsOpts = _.merge({}, opts, {
-                method: "OPTIONS"
+                method: "OPTIONS",
+                data: null,
+                body: null,
+                headers: {
+                    "Content-Type": null,
+                }
             })
             //初始化请求
             await setRequestOptions(curl, corsOpts);
