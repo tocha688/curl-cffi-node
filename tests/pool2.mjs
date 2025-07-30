@@ -1,8 +1,9 @@
 import pLimit from "p-limit";
-import { CurlSession } from "../src/index.ts";
+import { CurlSession } from "../dist/index.mjs";
 
+console.log("开始任务")
 const limit = pLimit(200);
-const watis = [] as Array<Promise<any>>;
+const watis = [];
 for (let i = 0; i < 5000; i++) {
     watis.push(limit(async () => {
         const req = new CurlSession({

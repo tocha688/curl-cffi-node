@@ -1,9 +1,5 @@
-import { Curl } from "@tocha688/libcurl"
-import { CurlClient,  Logger } from "../src"
-import { CookieJar } from "tough-cookie";
+import { req } from "../src"
 // Logger.level= 4; // 设置日志级别为 debug
-
-const req = new CurlClient()
 
 const watis = [] as Array<Promise<any>>;
 console.time('request');

@@ -100,6 +100,7 @@ export class CurlMultiTimer extends CurlMulti {
                     const call = this.curls.get(msg.easyId);
                     if (!call || !msg.data) continue;
                     this.curls.delete(msg.easyId);
+                    this.removeHandle(call.curl);
                     if (msg.data.result == 0) {
                         Logger.debug(`CurlMultiTimer - getInfoNumber - start`, msg.easyId);
                         const status = call.curl.getInfoNumber(CurlInfo.ResponseCode) || 200;
@@ -113,7 +114,6 @@ export class CurlMultiTimer extends CurlMulti {
                         call.reject(new Error(call.curl.error(msg.data.result)));
                     }
                     Logger.debug(`CurlMultiTimer - checkProcess - DONE`);
-                    this.removeHandle(call.curl);
                     // call.curl.close();
                     Logger.debug(`CurlMultiTimer - checkProcess - DONE OK`);
                 } else {
