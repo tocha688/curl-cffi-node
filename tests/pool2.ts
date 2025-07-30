@@ -3,7 +3,7 @@ import { CurlSession } from "../dist/index.mjs";
 
 console.log("开始任务")
 const limit = pLimit(200);
-const watis = [];
+const watis = [] as any[];
 for (let i = 0; i < 5000; i++) {
     watis.push(limit(async () => {
         const req = new CurlSession({
