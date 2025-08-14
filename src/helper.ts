@@ -11,15 +11,15 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
     const currentUrl = buildUrl(opts.url as string, opts.params);
     const method = opts.method?.toLocaleUpperCase() || 'GET';
     if (method == "POST") {
-        curl.setOptLong(CurlOpt.Post, 1);
+        curl.setOption(CurlOpt.Post, 1);
     } else if (method !== "GET") {
-        curl.setOptString(CurlOpt.CustomRequest, method)
+        curl.setOption(CurlOpt.CustomRequest, method)
     }
     if (method == "HEAD") {
-        curl.setOptLong(CurlOpt.Nobody, 1);
+        curl.setOption(CurlOpt.Nobody, 1);
     }
     //url
-    curl.setOptString(CurlOpt.Url, currentUrl);
+    curl.setOption(CurlOpt.Url, currentUrl);
     //data/body/json
     let body: any = opts.data;
     //headers
@@ -28,13 +28,19 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
     if (opts.data && typeof opts.data === 'object') {
         if (opts.data instanceof URLSearchParams) {
             body = opts.data.toString()
-            contentType = 'application/x-www-form-urlencoded';
+            if (contentType) {
+                contentType = 'application/x-www-form-urlencoded';
+            }
         } else if (Buffer.isBuffer(opts.data)) {
             body = opts.data;
-            contentType = 'application/octet-stream';
+            if (contentType) {
+                contentType = 'application/octet-stream';
+            }
         } else {
             body = JSON.stringify(opts.data)
-            contentType = 'application/json';
+            if (contentType) {
+                contentType = 'application/json';
+            }
         }
     } else if (typeof opts.data === 'string') {
         body = opts.data;
@@ -42,9 +48,9 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
         body = ""
     }
     if (body || ["POST", "PUT", "PATCH"].includes(method)) {
-        curl.setBodyString(body);
+        curl.setBody(body);
         if (method == "GET") {
-            curl.setOptString(CurlOpt.CustomRequest, method);
+            curl.setOption(CurlOpt.CustomRequest, method);
         }
     }
     if (contentType) {
@@ -55,8 +61,8 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
     // curl.setOptList(CurlOpt.HttpHeader, headers.toArray());
     curl.setHeadersRaw(headers.toArray());
     //cookie
-    curl.setOptString(CurlOpt.CookieFile, "");
-    curl.setOptString(CurlOpt.CookieList, 'ALL');
+    curl.setOption(CurlOpt.CookieFile, "");
+    curl.setOption(CurlOpt.CookieList, 'ALL');
     const cookieHeader = headers.first("cookie");
     if (cookieHeader || opts.jar) {
         const cookies = new Map<string, string>();
@@ -88,14 +94,14 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
     //auth
     if (opts.auth) {
         const { username, password } = opts.auth;
-        curl.setOptString(CurlOpt.Username, username);
-        curl.setOptString(CurlOpt.Password, password);
+        curl.setOption(CurlOpt.Username, username);
+        curl.setOption(CurlOpt.Password, password);
     }
     opts.timeout = opts.timeout ?? 0;
     //timeout
     if (opts.timeout && opts.timeout > 0) {
         //不是流传输
-        curl.setOptLong(CurlOpt.TimeoutMs, opts.timeout);
+        curl.setOption(CurlOpt.TimeoutMs, opts.timeout);
         //     if not stream:
         //     c.setopt(CurlOpt.TIMEOUT_MS, int(timeout * 1000))
         // else:
@@ -104,31 +110,31 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
         //     c.setopt(CurlOpt.LOW_SPEED_TIME, math.ceil(timeout))
     }
     // allow_redirects
-    curl.setOptBool(CurlOpt.FollowLocation, opts.allowRedirects ?? true);
-    curl.setOptLong(CurlOpt.MaxRedirs, opts.maxRedirects ?? 30);
+    curl.setOption(CurlOpt.FollowLocation, opts.allowRedirects ?? true);
+    curl.setOption(CurlOpt.MaxRedirs, opts.maxRedirects ?? 30);
 
     //代理
     if (opts.proxy) {
         const proxy = new URL(opts.proxy);
-        curl.setOptString(CurlOpt.Proxy, proxy.protocol + '//' + proxy.host);
+        curl.setOption(CurlOpt.Proxy, proxy.protocol + '//' + proxy.host);
         if (!proxy.protocol.startsWith('socks')) {
-            curl.setOptBool(CurlOpt.HttpProxyTunnel, true);
+            curl.setOption(CurlOpt.HttpProxyTunnel, true);
         }
         if (proxy.username && proxy.password) {
-            curl.setOptString(CurlOpt.ProxyUsername, proxy.username);
-            curl.setOptString(CurlOpt.ProxyPassword, proxy.password);
+            curl.setOption(CurlOpt.ProxyUsername, proxy.username);
+            curl.setOption(CurlOpt.ProxyPassword, proxy.password);
         }
     }
     // 显式禁用SSL验证
     if (opts.verify === false) {
-        curl.setOptLong(CurlOpt.SslVerifyPeer, 0);
-        curl.setOptLong(CurlOpt.SslVerifyHost, 0);
+        curl.setOption(CurlOpt.SslVerifyPeer, 0);
+        curl.setOption(CurlOpt.SslVerifyHost, 0);
     } else {
-        curl.setOptLong(CurlOpt.SslVerifyPeer, 1);
-        curl.setOptLong(CurlOpt.SslVerifyHost, 2);
+        curl.setOption(CurlOpt.SslVerifyPeer, 1);
+        curl.setOption(CurlOpt.SslVerifyHost, 2);
         //设置证书
-        curl.setOptString(CurlOpt.CaInfo, certPath);
-        curl.setOptString(CurlOpt.ProxyCaInfo, certPath);
+        curl.setOption(CurlOpt.CaInfo, certPath);
+        curl.setOption(CurlOpt.ProxyCaInfo, certPath);
     }
 
     //指纹
@@ -138,80 +144,80 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
 
     // referer
     if (opts.referer) {
-        curl.setOptString(CurlOpt.Referer, opts.referer);
+        curl.setOption(CurlOpt.Referer, opts.referer);
     }
     // accept_encoding
     if (opts.acceptEncoding) {
-        curl.setOptString(CurlOpt.AcceptEncoding, opts.acceptEncoding);
+        curl.setOption(CurlOpt.AcceptEncoding, opts.acceptEncoding);
     }
 
     //单独证书
     if (typeof opts.cert === 'string') {
-        curl.setOptString(CurlOpt.SslCert, opts.cert);
+        curl.setOption(CurlOpt.SslCert, opts.cert);
     } else if (!!opts.cert) {
-        !!opts.cert?.cert && curl.setOptString(CurlOpt.SslCert, opts.cert.cert);
-        !!opts.cert?.key && curl.setOptString(CurlOpt.SslKey, opts.cert.key);
+        !!opts.cert?.cert && curl.setOption(CurlOpt.SslCert, opts.cert.cert);
+        !!opts.cert?.key && curl.setOption(CurlOpt.SslKey, opts.cert.key);
     }
 
     // 只有在没有指纹时才设置 HTTP 版本
     if (!opts.impersonate && !opts.httpVersion) {
-        curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version('v2'));
+        curl.setOption(CurlOpt.HttpVersion, normalize_http_version('v2'));
     } else if (!opts.impersonate && opts.httpVersion) {
-        curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version(opts.httpVersion));
+        curl.setOption(CurlOpt.HttpVersion, normalize_http_version(opts.httpVersion));
     }
 
     // 删除这段重复设置的代码
     // if (!opts.httpVersion) {
-    //     curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version('v2'));
+    //     curl.setOption(CurlOpt.HttpVersion, normalize_http_version('v2'));
     // } else {
-    //     curl.setOptLong(CurlOpt.HttpVersion, normalize_http_version(opts.httpVersion));
+    //     curl.setOption(CurlOpt.HttpVersion, normalize_http_version(opts.httpVersion));
     // }
 
     // 删除重复的 interface 设置
     if (opts.interface) {
-        curl.setOptString(CurlOpt.Interface, opts.interface);
+        curl.setOption(CurlOpt.Interface, opts.interface);
     }
 
     //ipType
     if (opts.ipType) {
         switch (opts.ipType) {
             case 'ipv4':
-                curl.setOptLong(CurlOpt.IpResolve, 1);
+                curl.setOption(CurlOpt.IpResolve, 1);
                 break;
             case 'ipv6':
-                curl.setOptLong(CurlOpt.IpResolve, 2);
+                curl.setOption(CurlOpt.IpResolve, 2);
                 break;
             case 'auto':
-                curl.setOptLong(CurlOpt.IpResolve, 0);
+                curl.setOption(CurlOpt.IpResolve, 0);
                 break;
         }
     }
 
     //添加keepalive
     if (opts.keepAlive === false && isCors === false) {
-        curl.setOptLong(CurlOpt.TcpKeepAlive, 0);
+        curl.setOption(CurlOpt.TcpKeepAlive, 0);
         //使用新连接
-        curl.setOptLong(CurlOpt.FreshConnect, 1);
+        curl.setOption(CurlOpt.FreshConnect, 1);
     }
 
     if (opts.dev) {
-        curl.setOptLong(CurlOpt.Verbose, 1);
-        // curl.setOptLong(CurlOpt.Header, 1);
-        // curl.setOptLong(CurlOpt.NoProgress, 0);
+        curl.setOption(CurlOpt.Verbose, 1);
+        // curl.setOption(CurlOpt.Header, 1);
+        // curl.setOption(CurlOpt.NoProgress, 0);
     }
     // since 0 is a valid value to disable it
-    curl.setOptLong(CurlOpt.MaxRecvSpeedLarge, opts.maxRecvSpeed ?? 0);
+    curl.setOption(CurlOpt.MaxRecvSpeedLarge, opts.maxRecvSpeed ?? 0);
     //参数
     if (opts.curlOptions) {
         if (!!opts?.curlOptions) {
             for (const [key, value] of Object.entries(opts.curlOptions)) {
                 let ekey = key as unknown as CurlOpt;
                 if (typeof value === 'string') {
-                    curl.setOptString(ekey, value);
+                    curl.setOption(ekey, value);
                 } else if (typeof value === 'number') {
-                    curl.setOptLong(ekey, value);
+                    curl.setOption(ekey, value);
                 } else if (typeof value === 'boolean') {
-                    curl.setOptBool(ekey, value);
+                    curl.setOption(ekey, value);
                 }
             }
         }

@@ -1,7 +1,6 @@
 import { CookieJar } from "tough-cookie";
-import { CurlClientSync } from "../src"
+import { req } from "../src"
 
-const req = new CurlClientSync();
 console.time('request');
 req.request({
     // url: 'https://postman-echo.com/post',
@@ -19,6 +18,8 @@ req.request({
     // defaultHeaders: false,
     verify: false,
     allowRedirects: true,
+    //同步请求
+    sync: true,
     // timeout: 1,
     // jar: new CookieJar(),
     // proxy: "http://127.0.0.1:10808",

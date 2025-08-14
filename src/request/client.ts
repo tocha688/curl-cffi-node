@@ -113,13 +113,13 @@ export class CurlClient extends CurlRequestImplBase {
         if (!ops) return;
         if (!this.multi) return;
         if (ops.keepAlive == false) {
-            this.multi.setOptLong(CurlMOpt.Pipelining, 1)
+            this.multi.setOption(CurlMOpt.Pipelining, 1)
         } else {
-            this.multi.setOptLong(CurlMOpt.Pipelining, 2)
+            this.multi.setOption(CurlMOpt.Pipelining, 2)
         }
-        this.multi.setOptLong(CurlMOpt.Pipelining, 2)
-        this.multi.setOptLong(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
-        this.multi.setOptLong(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 500);
+        this.multi.setOption(CurlMOpt.Pipelining, 2)
+        this.multi.setOption(CurlMOpt.MaxConnects, ops.MaxConnects ?? 10);
+        this.multi.setOption(CurlMOpt.MaxConcurrentStreams, ops.MaxConcurrentStreams ?? 500);
     }
 
     protected async send(options: RequestOptions, curl: Curl): Promise<CurlResponse> {
