@@ -21,16 +21,15 @@ export function setRequestOptions(curl: Curl, opts: RequestOptions, isCors = fal
     //url
     curl.setOptString(CurlOpt.Url, currentUrl);
     //data/body/json
-    let body: any = "";
+    let body: any = opts.data;
     //headers
     const headers = new HttpHeaders(opts.headers);
-
     let contentType = headers.first('Content-Type');
     if (opts.data && typeof opts.data === 'object') {
-        if (body instanceof URLSearchParams) {
+        if (opts.data instanceof URLSearchParams) {
             body = opts.data.toString()
             contentType = 'application/x-www-form-urlencoded';
-        } else if (Buffer.isBuffer(body)) {
+        } else if (Buffer.isBuffer(opts.data)) {
             body = opts.data;
             contentType = 'application/octet-stream';
         } else {
