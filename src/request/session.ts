@@ -1,6 +1,6 @@
 import { CookieJar } from "tough-cookie";
 import { CurlResponse, RequestOptions } from "../type";
-import { Curl } from "..";
+import { Curl, storageCurls } from "..";
 import { CurlClient } from "./client";
 
 type CurlInfo = {
@@ -17,6 +17,8 @@ export class CurlSession extends CurlClient {
 
         //开启检查1分钟没有操作就自动关闭curl
         this.startCheckCurlClose();
+
+        storageCurls.add(this);
     }
     private curlCheckTimer?: NodeJS.Timeout;
     private startCheckCurlClose(){
@@ -47,6 +49,7 @@ export class CurlSession extends CurlClient {
         this.curlCheckTimer && clearInterval(this.curlCheckTimer);
         this.curlCheckTimer = undefined;
         super.close();
+        storageCurls.delete(this);
     }
 
     override async beforeResponse(options: RequestOptions, curl: Curl, res: CurlResponse): Promise<CurlResponse> {

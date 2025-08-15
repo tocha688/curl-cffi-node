@@ -5,11 +5,16 @@ import { CurlClient } from "./client";
 curlGlobalInit();
 //@ts-ignore
 // export const gimpl: CurlMultiImpl = global.gimpl = global.gimpl ?? new CurlMultiImpl();
+export const storageCurls: Set<any> = global.__Tocha_CurlStorage = global.__Tocha_CurlStorage ?? new Set<any>();
 export const req = new CurlClient();
+storageCurls.add(req);
 
 // 监听多个退出事件
 const cleanup = () => {
-    req.close();
+    console.log("Cleaning up...");
+    storageCurls.forEach(item => {
+        item.close();
+    })
     globalCleanup();
 };
 
