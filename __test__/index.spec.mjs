@@ -20,7 +20,6 @@ test('getVersion should return a valid version string', async (t) => {
     // 打印版本信息以便于调试
     console.log(`Curl version: ${version}`)
     console.log(`Lib path: ${libPath()}`)
-    
 })
 
 // 添加测试后的清理
