@@ -62,6 +62,13 @@ export type RequestOptions = {
     // curl?: Curl
 }
 
+// 实例化（客户端级别）配置，与单次请求的配置分离
+// 不包含 url/method/params/data 等仅在请求时使用的字段
+// 初始化配置：基于 RequestOptions 派生，移除仅请求时使用的字段
+export type RequestInitOptions = Omit<RequestOptions, "method" | "url" | "params" | "data"> & {
+    baseUrl?: string;
+};
+
 export type FetchOptions = RequestOptions & {
     body?: string | Record<string, any> | null;
     //同步

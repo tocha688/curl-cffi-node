@@ -46,7 +46,7 @@ watis.push(req.request({
 // }))
 
 Promise.all(watis).finally(() => {
-    // req.close();
-    // console.log("所有请求完成，关闭连接池");
+    req.close();
+    console.log("所有请求完成，关闭连接池");
 })
 

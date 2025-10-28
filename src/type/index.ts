@@ -1,5 +1,6 @@
 
-import { RequestOptions } from "./request";
+import { RequestOptions, RequestInitOptions } from "./request";
+import _ from "lodash";
 
 export const defaultRequestOption: Partial<RequestOptions> = {
     method: 'GET',
@@ -14,6 +15,9 @@ export const defaultRequestOption: Partial<RequestOptions> = {
     defaultHeaders: true,
     maxRecvSpeed: 0,
 };
+
+// 客户端默认配置（用于实例化 CurlRequest），不包含 url/method 等仅请求时使用的字段
+export const defaultInitOptions: Partial<RequestInitOptions> = _.omit(defaultRequestOption, ["method", "url", "params", "data"]) as Partial<RequestInitOptions>;
 
 export * from "./request";
 export * from "./header";
