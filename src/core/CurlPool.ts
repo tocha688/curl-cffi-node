@@ -1,4 +1,5 @@
 import { Curl } from "@tocha688/libcurl";
+import { storageCurls } from "../request";
 
 type PoolItem = {
   curl: Curl;
@@ -28,6 +29,7 @@ export class CurlPool {
     this.maxSize = opts.maxSize ?? Number.POSITIVE_INFINITY;
     this.idleTTL = opts.idleTTL ?? 60_000;
     this.startPrune();
+    storageCurls.add(this);
   }
 
   acquire(): Curl {

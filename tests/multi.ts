@@ -14,17 +14,18 @@ watis.push(req.request({
 }).then(res => {
     console.timeEnd('request');
     console.log("请求成功 111", res.status);
+    // console.log("请求成功 111", res.text);
 }).catch(err => {
     console.log("请求错误", err.message)
 }))
 
-// watis.push(req.request({
-//     url: 'https://tls.peet.ws/api/all',
-// }).then(res => {
-//     console.log("请求成功 222",res.statusCode);
-// }).catch(err => {
-//     console.log("请求错误", err.message)
-// }))
+watis.push(req.request({
+    url: 'https://tls.peet.ws/api/all',
+}).then(res => {
+    console.log("请求成功 222",res.status);
+}).catch(err => {
+    console.log("请求错误", err.message)
+}))
 
 // watis.push(req.request({
 //    url: 'https://google.com',
@@ -46,7 +47,7 @@ watis.push(req.request({
 // }))
 
 Promise.all(watis).finally(() => {
-    req.close();
+    // req.close();
     console.log("所有请求完成，关闭连接池");
 })
 

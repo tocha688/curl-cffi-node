@@ -3,6 +3,7 @@ import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
 import { Logger } from "../logger";
+import { storageCurls } from "../request";
 
 const CURL_POLL_NONE = 0
 const CURL_POLL_IN = 1
@@ -34,19 +35,23 @@ export class CurlMultiTimer extends CurlMulti {
 
     constructor() {
         super();
-        this.setupCallbacks();
-        this.startForceTimeout();
+        // this.setupCallbacks();
+        // this.startForceTimeout();
+        storageCurls.add(this);
     }
 
     private startForceTimeout(): void {
+        if (this.forceTimeoutTimer) return;
         const forceTimeout = () => {
             if (this.closed) return;
             if (this.curls.size > 0) {
                 this.processData();
+            } else if (!!this.startForceTimeout) {
+                clearInterval(this.forceTimeoutTimer as any);
+                this.forceTimeoutTimer = null;
             }
         };
-        this.forceTimeoutTimer = setInterval(forceTimeout, 10);
-        this.forceTimeoutTimer.unref()
+        this.forceTimeoutTimer = setInterval(forceTimeout, 100);
     }
 
     /**
@@ -96,6 +101,7 @@ export class CurlMultiTimer extends CurlMulti {
                 if (!msg) {
                     break;
                 }
+                Logger.warn(`CurlMultiTimer - Message`, msg);
                 if (msg.msg === CURLMSG_DONE) {
                     const call = this.curls.get(msg.easyId);
                     if (!call || !msg.data) continue;
@@ -140,6 +146,7 @@ export class CurlMultiTimer extends CurlMulti {
             Logger.debug(`CurlMultiTimer - request - addHandle end`);
             // this.performSocketAction(CURL_SOCKET_TIMEOUT, 0);
             // 立即触发一次socket action来启动请求
+            this.startForceTimeout();
             setImmediate(() => {
                 if (!this.closed) {
                     this.processData();
@@ -149,6 +156,7 @@ export class CurlMultiTimer extends CurlMulti {
     }
 
     close(): void {
+        storageCurls.delete(this);
         if (this.closed) return;
         Logger.debug(`CurlMultiTimer - close start`);
 

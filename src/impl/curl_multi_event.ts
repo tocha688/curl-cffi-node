@@ -1,3 +1,6 @@
+/**
+ * 当前模块未完善 不可用
+ */
 import { Curl, CurlMulti, CurlInfo } from "@tocha688/libcurl"
 import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
@@ -112,6 +115,8 @@ export class CurlMultiEvent extends CurlMulti {
                     this.processData(CURL_SOCKET_TIMEOUT, CURL_POLL_NONE);
                     this.timers.delete(timer);
                 }, timeoutMs);
+                // 不阻塞进程退出
+                timer.unref?.();
                 this.timers.add(timer);
             }
         });
