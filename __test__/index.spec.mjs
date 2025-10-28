@@ -22,9 +22,3 @@ test('getVersion should return a valid version string', async (t) => {
     console.log(`Lib path: ${libPath()}`)
 })
 
-// 添加测试后的清理
-test.after.always(() => {
-    setTimeout(() => {
-        process.exit(0)
-    }, 50)
-})
