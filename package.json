@@ -1,12 +1,12 @@
 {
   "name": "curl-cffi",
-  "version": "0.1.42",
+  "version": "0.1.43",
   "description": "A powerful HTTP client for Node.js based on libcurl with browser fingerprinting capabilities.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "libcurl": {
-    "version": "v1.1.2"
+    "version": "v1.2.2"
   },
   "exports": {
     ".": {
