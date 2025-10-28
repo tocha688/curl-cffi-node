@@ -2,8 +2,10 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
 
-export const libsPath = path.join(__dirname, "..", 'libs');
-export const certPath = path.join(libsPath, "cacert.pem");
+// 全局缓存目录，安装脚本会将依赖下载到这里：~/.curl-cffi/libs
+export const globalLibsPath = path.join(os.homedir(), ".curl-cffi", "libs");
+// 证书只使用全局目录中的文件
+export const certPath = path.join(globalLibsPath, "cacert.pem");
 
 export function getDirName() {
     const archMap: Record<string, string> = {
@@ -32,14 +34,57 @@ export function getLibPath() {
         "win32": ["bin/libcurl.dll"],
         "darwin": ["libcurl-impersonate.4.dylib", "libcurl-impersonate.dylib"],
         "linux": ["libcurl-impersonate.so"],
+    };
+    const candidates = libs[os.platform()] || [];
+
+    if (!fs.existsSync(globalLibsPath)) {
+        throw new Error(`Global libs directory not found: ${globalLibsPath}. Please run scripts/install.cjs first.`);
     }
-    for (let lib of libs[os.platform()] || []) {
-        const libpath = path.join(libsPath, name, lib);
-        if (fs.existsSync(libpath)) {
-            return libpath;
+
+    // 从 package.json 读取推荐版本，如果存在则精准匹配该版本目录
+    let preferredVersion: string | null = null;
+    try {
+        const pkgPath = path.join(__dirname, "..", "package.json");
+        const text = fs.readFileSync(pkgPath, "utf-8");
+        const pkg = JSON.parse(text);
+        preferredVersion = pkg?.libcurl?.version ?? null;
+    } catch { /* ignore */ }
+
+    const dirs = fs.readdirSync(globalLibsPath, { withFileTypes: true })
+        .filter(d => d.isDirectory() && d.name.startsWith(name + "_"));
+
+    if (preferredVersion) {
+        const expectDir = `${name}_${preferredVersion}`; // 如 x86_64-win32_v1.1.2
+        const hit = dirs.find(d => d.name === expectDir);
+        if (!hit) {
+            throw new Error(`Configured libcurl.version='${preferredVersion}' not found under ${globalLibsPath}. Please run scripts/install.cjs to download this version.`);
+        }
+        for (const lib of candidates) {
+            const p = path.join(globalLibsPath, hit.name, lib);
+            if (fs.existsSync(p)) return p;
+        }
+        throw new Error(`Lib file not found in ${path.join(globalLibsPath, hit.name)} for platform ${os.platform()}.`);
+    }
+
+    // 若未配置版本，按版本降序选择最新
+    function parseVer(s: string): number[] {
+        const part = s.substring(s.indexOf("_") + 1).replace(/^v/i, "");
+        return part.split(".").map(x => parseInt(x, 10) || 0);
+    }
+    function cmpDesc(a: string, b: string): number {
+        const va = parseVer(a), vb = parseVer(b);
+        for (let i = 0; i < Math.max(va.length, vb.length); i++) {
+            const ai = va[i] || 0, bi = vb[i] || 0;
+            if (ai !== bi) return bi - ai; // 降序
+        }
+        return 0;
+    }
+    const sorted = dirs.map(d => d.name).sort(cmpDesc);
+    for (const dn of sorted) {
+        for (const lib of candidates) {
+            const p = path.join(globalLibsPath, dn, lib);
+            if (fs.existsSync(p)) return p;
         }
     }
-    // console.error(`libcurl not found for platform ${os.platform()} and arch ${os.arch()}`);
-    console.error(`Expected path: ${path.join(libsPath, name)}`);
-    throw new Error(`libcurl not found for platform ${os.platform()} and arch ${os.arch()}`);
+    throw new Error(`libcurl not found under ${globalLibsPath}; please run scripts/install.cjs.`);
 }

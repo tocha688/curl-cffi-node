@@ -12,7 +12,6 @@ storageCurls.add(req);
 // 监听多个退出事件（避免在 'exit' 事件中做清理，部分平台可能阻塞退出）
 let cleaned = false;
 const cleanup = () => {
-    console.log("退出关闭")
     if (cleaned) return;
     cleaned = true;
     try {
