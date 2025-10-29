@@ -5,6 +5,7 @@ import { CurlResponse, defaultInitOptions, RequestInitOptions, RequestOptions } 
 import { CurlPool, CurlPoolOptions } from "../core/CurlPool";
 import { BaseClient } from "./BaseClient";
 import { corsPreflightIfNeeded, mergeDefaultParamsAndData, resolveUrlWithBase, withRetry } from "./shared";
+import { InterceptorManager } from "./interceptors";
 
 /**
  * 通用请求基类：抽取 CurlRequest/CurlRequestMulti 的重复逻辑。
@@ -17,6 +18,10 @@ export abstract class RequestClientBase extends BaseClient {
   readonly opts: RequestInitOptions;
   protected readonly baseUrl?: string;
   protected readonly pool: CurlPool;
+  readonly interceptors = {
+    request: new InterceptorManager<RequestOptions>('request'),
+    response: new InterceptorManager<CurlResponse>('response'),
+  };
 
   constructor(opts: RequestInitOptions = _.clone(defaultInitOptions), poolOptions: CurlPoolOptions = {}) {
     super();
@@ -41,17 +46,40 @@ export abstract class RequestClientBase extends BaseClient {
 
   async request(options: RequestOptions): Promise<CurlResponse> {
     const curl = this.pool.acquire();
-    const opts = this.prepareOptions(options);
+    let opts = this.prepareOptions(options);
     try {
+      // 请求拦截器（类似 axios）
+      try {
+        opts = await this.interceptors.request.runFulfilled(opts);
+      } catch (err) {
+        const recovered = await this.interceptors.request.runRejected(err, opts);
+        if (recovered !== undefined) opts = recovered;
+        else throw err;
+      }
       // CORS 预检
       await corsPreflightIfNeeded(curl, opts);
       // 重试封装 + 通用 setRequestOptions
-      const res = await withRetry(opts.retryCount ?? 0, async () => {
-        curl.reset();
-        await setRequestOptions(curl, opts);
-        return await this.send(curl, opts);
-      });
-      return res;
+      let res: CurlResponse;
+      try {
+        res = await withRetry(opts.retryCount ?? 0, async () => {
+          curl.reset();
+          await setRequestOptions(curl, opts);
+          return await this.send(curl, opts);
+        });
+      } catch (err) {
+        // 让响应错误拦截器有机会处理网络错误/重试等场景
+        const recovered = await this.interceptors.response.runRejected(err);
+        if (recovered !== undefined) return recovered;
+        throw err;
+      }
+      // 响应拦截器
+      try {
+        return await this.interceptors.response.runFulfilled(res);
+      } catch (err) {
+        const recovered = await this.interceptors.response.runRejected(err, res);
+        if (recovered !== undefined) return recovered;
+        throw err;
+      }
     } finally {
       // 释放到池中以便后续复用
       this.pool.release(curl);
@@ -63,5 +91,18 @@ export abstract class RequestClientBase extends BaseClient {
 
   close() {
     this.pool.close();
+  }
+
+  // 兼容旧的事件注册 API：仅注册 fulfilled 拦截器
+  onRequest(event: (options: RequestOptions) => Promise<RequestOptions> | RequestOptions): number {
+    return this.interceptors.request.use(event);
+  }
+  onResponse(event: (res: CurlResponse) => Promise<CurlResponse> | CurlResponse): number {
+    return this.interceptors.response.use(event);
+  }
+
+  // 插件系统：插件通过 install(this) 注册其拦截器或其它行为
+  use(plugin: { install(client: RequestClientBase): void }): void {
+    plugin.install(this);
   }
 }

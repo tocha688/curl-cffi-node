@@ -1,7 +1,7 @@
 import { Curl } from "@tocha688/libcurl";
 import _ from "lodash";
 import { request, requestSync } from "../impl";
-import { CurlResponse, defaultInitOptions, RequestEvent, RequestOptions, RequestInitOptions, ResponseEvent } from "../type";
+import { CurlResponse, defaultInitOptions, RequestOptions, RequestInitOptions } from "../type";
 import { CurlPoolOptions } from "../core/CurlPool";
 import { RequestClientBase } from "./RequestClientBase";
 
@@ -13,30 +13,13 @@ import { RequestClientBase } from "./RequestClientBase";
  * - 支持 baseUrl，自动拼接相对路径。
  */
 export class CurlRequest extends RequestClientBase {
-  private reqs: Set<RequestEvent> = new Set();
-  private resps: Set<ResponseEvent> = new Set();
 
   constructor(opts: RequestInitOptions = _.clone(defaultInitOptions), poolOptions: CurlPoolOptions = {}) {
     super(opts, poolOptions);
   }
 
-  onRequest(event: RequestEvent) {
-    this.reqs.add(event);
-  }
-  onResponse(event: ResponseEvent) {
-    this.resps.add(event);
-  }
-
-  private async emits<T>(data: T, calls: Set<(d: T) => Promise<T>>): Promise<T> {
-    for (const call of calls) data = await call(data);
-    return data;
-  }
-
   protected async send(curl: Curl, opts: RequestOptions): Promise<CurlResponse> {
-    await this.emits(opts, this.reqs);
-    const result = await (opts.sync ? requestSync(opts, curl) : request(opts, curl));
-    const finalRes = await this.emits(result as CurlResponse, this.resps);
-    return finalRes as CurlResponse;
+    return await (opts.sync ? requestSync(opts, curl) : request(opts, curl));
   }
 
   // 便捷方法由 BaseClient 统一提供
