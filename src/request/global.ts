@@ -26,7 +26,7 @@ const cleanup = () => {
 };
 
 process.on("beforeExit", cleanup);
-process.on("SIGINT", cleanup);
-process.on("SIGTERM", cleanup);
-process.on("uncaughtException", cleanup);
-process.on("unhandledRejection", cleanup);
+// process.on("SIGINT", cleanup);
+// process.on("SIGTERM", cleanup);
+// process.on("uncaughtException", cleanup);
+// process.on("unhandledRejection", cleanup);
