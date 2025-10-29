@@ -10,13 +10,16 @@ async function testBaseUrl() {
   // 创建带 baseUrl 的客户端
   const client = new CurlRequest({
     baseUrl: "https://httpbin.org",
-    timeout: 10000
+    timeout: 10000,
+    params:{
+      q:"999"
+    }
   });
 
   try {
     // 测试相对路径
     console.log("1. 测试相对路径 '/get'");
-    const response1 = await client.get("/get");
+    const response1 = await client.get("/get?a=1");
     console.log(`状态码: ${response1.status}`);
     console.log(`响应数据类型: ${typeof response1.data}`);
     

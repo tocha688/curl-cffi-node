@@ -1,6 +1,6 @@
 import { CookieJar } from "tough-cookie";
-import { CurlResponse, RequestOptions } from "../type";
-import { RequestInitOptions, storageCurls } from "..";
+import { CurlResponse, RequestOptions, RequestInitOptions } from "../type";
+import { storageCurls } from "./global";
 import { CurlRequest } from "./CurlRequest";
 import { CurlPoolOptions } from "../core/CurlPool";
 
@@ -13,12 +13,6 @@ export class CurlSession extends CurlRequest {
             ...ops,
             jar: ops?.jar ?? new CookieJar(),
         }, poolOptions);
-        storageCurls.add(this);
-    }
-
-    override close() {
-        super.close();
-        storageCurls.delete(this);
     }
 }
 

@@ -1,5 +1,6 @@
 import { Curl } from "@tocha688/libcurl";
-import { storageCurls } from "../request";
+// 避免通过 request/index 的聚合导出引入 session.ts 导致循环依赖
+import { storageCurls } from "../request/global";
 
 type PoolItem = {
   curl: Curl;

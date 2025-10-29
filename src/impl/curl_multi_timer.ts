@@ -3,7 +3,8 @@ import { CurlResponse, RequestOptions } from "../type";
 import { parseResponse, setRequestOptions } from "../helper";
 import { sleep } from "../utils";
 import { Logger } from "../logger";
-import { storageCurls } from "../request";
+// 避免通过 request/index 的聚合导出引入 session.ts 导致循环依赖
+import { storageCurls } from "../request/global";
 
 const CURL_POLL_NONE = 0
 const CURL_POLL_IN = 1

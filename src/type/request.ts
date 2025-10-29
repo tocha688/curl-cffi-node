@@ -65,8 +65,15 @@ export type RequestOptions = {
 // 实例化（客户端级别）配置，与单次请求的配置分离
 // 不包含 url/method/params/data 等仅在请求时使用的字段
 // 初始化配置：基于 RequestOptions 派生，移除仅请求时使用的字段
+// 初始化配置：基于 RequestOptions 派生，移除仅请求时使用的字段
+// 并新增 defaultParams/defaultData 作为客户端/会话级的默认值
 export type RequestInitOptions = Omit<RequestOptions, "method" | "url" | "params" | "data"> & {
     baseUrl?: string;
+    // 客户端/会话级默认查询参数（与每次请求的 options.params 合并，请求优先）
+    params?: Record<string, any>;
+    // 客户端/会话级默认请求体数据，会在每次请求时与 options.data 合并（请求优先）
+    // 当两者均为对象时执行深合并；当为 URLSearchParams 时合并键值；否则以请求传入的值优先
+    defaultData?: Record<string, any> | string | URLSearchParams | null;
 };
 
 export type FetchOptions = RequestOptions & {

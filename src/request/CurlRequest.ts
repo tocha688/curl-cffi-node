@@ -5,6 +5,7 @@ import { request, requestSync } from "../impl";
 import { CurlResponse, defaultInitOptions, RequestEvent, RequestOptions, RequestInitOptions, ResponseEvent } from "../type";
 import { CurlPool, CurlPoolOptions } from "../core/CurlPool";
 import { BaseClient } from "./BaseClient";
+import { corsPreflightIfNeeded, mergeDefaultParamsAndData, resolveUrlWithBase, withRetry } from "./shared";
 
 /**
  * 单请求客户端：默认直接使用 Curl.perform/send 发起请求。
@@ -34,26 +35,6 @@ export class CurlRequest extends BaseClient {
     this.resps.add(event);
   }
 
-  /**
-   * 拼接 baseUrl 和相对路径
-   */
-  private resolveUrl(url: string): string {
-    if (!this.baseUrl || this.isAbsoluteUrl(url)) {
-      return url;
-    }
-    
-    // 处理路径分隔符
-    const base = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
-    const path = url.startsWith('/') ? url : `/${url}`;
-    return `${base}${path}`;
-  }
-
-  /**
-   * 检查是否为绝对 URL
-   */
-  private isAbsoluteUrl(url: string): boolean {
-    return /^https?:\/\//.test(url);
-  }
   private async emits<T>(data: T, calls: Set<(d: T) => Promise<T>>): Promise<T> {
     for (const call of calls) data = await call(data);
     return data;
@@ -63,43 +44,29 @@ export class CurlRequest extends BaseClient {
     const curl = this.pool.acquire();
     // 防止单次请求覆盖初始化的 baseUrl（即使用户绕过类型传入）
     const { baseUrl: _ignoredBaseUrl, ...reqOptions } = (options as any) ?? {};
-    const opts = _.merge({}, this.baseOptions, reqOptions) as RequestOptions;
+    let opts = _.merge({}, this.baseOptions, reqOptions) as RequestOptions;
+    // 使用通用合并逻辑（请求优先）
+    opts = mergeDefaultParamsAndData(this.baseOptions, opts);
     
     // 处理 URL 拼接
     if (opts.url) {
-      opts.url = this.resolveUrl(opts.url);
+      opts.url = resolveUrlWithBase(this.baseUrl, opts.url);
     }
 
     // CORS 预检
-    if (opts.cors) {
-      const corsOpts = _.merge({}, opts, {
-        method: "OPTIONS",
-        data: null,
-        body: null,
-        headers: { "Content-Type": null as any },
-      });
-      await setRequestOptions(curl, corsOpts);
-      await (corsOpts.sync ? requestSync(corsOpts, curl) : request(corsOpts, curl));
-    }
+    await corsPreflightIfNeeded(curl, opts);
 
     // 正常请求 + 重试
-    let retryCount = opts.retryCount ?? 0;
-    let result: CurlResponse | undefined;
+    const retryCount = opts.retryCount ?? 0;
     try {
-      do {
-        try {
-          curl.reset();
-          await setRequestOptions(curl, opts);
-          await this.emits(opts, this.reqs);
-          result = await (opts.sync ? requestSync(opts, curl) : request(opts, curl));
-          break; // 成功
-        } catch (e) {
-          if (retryCount <= 0) throw e;
-          // 继续重试
-        }
-      } while (retryCount-- > 0);
-      result = await this.emits(result as CurlResponse, this.resps);
-      return result as CurlResponse;
+      const result = await withRetry(retryCount, async () => {
+        curl.reset();
+        await setRequestOptions(curl, opts);
+        await this.emits(opts, this.reqs);
+        return await (opts.sync ? requestSync(opts, curl) : request(opts, curl));
+      });
+      const finalRes = await this.emits(result as CurlResponse, this.resps);
+      return finalRes as CurlResponse;
     } finally {
       // 释放到池中以便后续复用
       this.pool.release(curl);
