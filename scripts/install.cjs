@@ -8,11 +8,11 @@ const tar = require("tar");
 // 使用全局目录缓存依赖，避免每个项目重复下载
 // Windows/Linux/macOS 都统一放在用户主目录下的 .curl-cffi/libs 目录
 const homeDir = path.join(os.homedir(), ".curl-cffi", "libs");
-// 从 package.json 读取 libcurl 版本，方便统一配置
-const pkg = require(path.join(__dirname, "..", "package.json"));
-const version = pkg?.libcurl?.version;
+// 从独立 JSON 配置文件读取 libcurl 版本，避免 ESM/CJS 差异
+const config = require(path.join(__dirname, "..", "libcurl.config.json"));
+const version = config?.version;
 if (!version) {
-    throw new Error("libcurl.version not found in package.json. Please set { libcurl: { version: \"vX.Y.Z\" } }.");
+    throw new Error("libcurl.version not found in libcurl.config.json. Please set { \"version\": \"vX.Y.Z\" }.");
 }
 
 function getDirName() {

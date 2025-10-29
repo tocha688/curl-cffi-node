@@ -15,7 +15,7 @@ const cleanup = () => {
     if (cleaned) return;
     cleaned = true;
     try {
-        console.log("Cleaning up...");
+        // console.log("Cleaning up...");
         storageCurls.forEach(item => {
             try { item.close(); } catch { /* ignore */ }
         });

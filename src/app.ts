@@ -41,13 +41,11 @@ export function getLibPath() {
         throw new Error(`Global libs directory not found: ${globalLibsPath}. Please run scripts/install.cjs first.`);
     }
 
-    // 从 package.json 读取推荐版本，如果存在则精准匹配该版本目录
+    // 从 libcurl.config.json 读取推荐版本，如果存在则精准匹配该版本目录
     let preferredVersion: string | null = null;
     try {
-        const pkgPath = path.join(__dirname, "..", "package.json");
-        const text = fs.readFileSync(pkgPath, "utf-8");
-        const pkg = JSON.parse(text);
-        preferredVersion = pkg?.libcurl?.version ?? null;
+        const cfg = require(path.join(__dirname, "..", "libcurl.config.json"));
+        preferredVersion = cfg?.version ?? null;
     } catch { /* ignore */ }
 
     const dirs = fs.readdirSync(globalLibsPath, { withFileTypes: true })
@@ -57,7 +55,7 @@ export function getLibPath() {
         const expectDir = `${name}_${preferredVersion}`; // 如 x86_64-win32_v1.1.2
         const hit = dirs.find(d => d.name === expectDir);
         if (!hit) {
-            throw new Error(`Configured libcurl.version='${preferredVersion}' not found under ${globalLibsPath}. Please run scripts/install.cjs to download this version.`);
+            throw new Error(`Configured version='${preferredVersion}' in libcurl.config.json not found under ${globalLibsPath}. Please run scripts/install.cjs to download this version.`);
         }
         for (const lib of candidates) {
             const p = path.join(globalLibsPath, hit.name, lib);
