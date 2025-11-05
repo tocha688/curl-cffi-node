@@ -3,7 +3,8 @@ import os from 'node:os';
 import fs from 'node:fs';
 
 // 全局缓存目录，安装脚本会将依赖下载到这里：~/.curl-cffi/libs
-export const globalLibsPath = path.join(os.homedir(), ".curl-cffi", "libs");
+// export const globalLibsPath = path.join(os.homedir(), ".curl-cffi", "libs");
+export const globalLibsPath = path.join(__dirname, "..", "libs");
 // 证书只使用全局目录中的文件
 export const certPath = path.join(globalLibsPath, "cacert.pem");
 

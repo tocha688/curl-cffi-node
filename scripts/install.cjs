@@ -7,7 +7,8 @@ const tar = require("tar");
 
 // 使用全局目录缓存依赖，避免每个项目重复下载
 // Windows/Linux/macOS 都统一放在用户主目录下的 .curl-cffi/libs 目录
-const homeDir = path.join(os.homedir(), ".curl-cffi", "libs");
+// const homeDir = path.join(os.homedir(), ".curl-cffi", "libs");
+const homeDir = path.join(__dirname, "..", "libs");
 // 从独立 JSON 配置文件读取 libcurl 版本，避免 ESM/CJS 差异
 const config = require(path.join(__dirname, "..", "libcurl.config.json"));
 const version = config?.version;
