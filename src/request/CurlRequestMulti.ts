@@ -13,15 +13,22 @@ import { corsPreflightIfNeeded, mergeDefaultParamsAndData, resolveUrlWithBase, w
  * - 提供 batch() 批量接口和 request() 单个接口。
  */
 export class CurlRequestMulti extends RequestClientBase {
-  private readonly multi: CurlMultiImpl;
+  private multi?: CurlMultiImpl;
 
   constructor(opts: RequestInitOptions = _.clone(defaultInitOptions), poolOptions: CurlPoolOptions = {}, multi?: CurlMultiImpl) {
     super(opts, poolOptions);
-    this.multi = multi ?? new CurlMultiImpl();
+    this.multi = multi;
+  }
+
+  private get multiImpl() {
+    if (!this.multi) {
+      this.multi = new CurlMultiImpl();
+    }
+    return this.multi
   }
 
   protected async send(curl: Curl, opts: RequestOptions): Promise<CurlResponse> {
-    return await this.multi.request(opts, curl);
+    return await this.multiImpl.request(opts, curl);
   }
 
   /**
@@ -35,7 +42,7 @@ export class CurlRequestMulti extends RequestClientBase {
   // 便捷方法由 BaseClient 统一提供
 
   close() {
-    this.multi.close();
+    this.multi?.close();
     super.close();
   }
 }
