@@ -36,23 +36,10 @@ export class CurlMultiTimer extends CurlMulti {
 
     constructor() {
         super();
-        // this.setupCallbacks();
+        this.setupCallbacks();
         // this.startForceTimeout();
         storageCurls.add(this);
-    }
-
-    private startForceTimeout(): void {
-        if (this.forceTimeoutTimer) return;
-        const forceTimeout = () => {
-            if (this.closed) return;
-            if (this.curls.size > 0) {
-                this.processData();
-            } else if (!!this.startForceTimeout) {
-                clearInterval(this.forceTimeoutTimer as any);
-                this.forceTimeoutTimer = null;
-            }
-        };
-        this.forceTimeoutTimer = setInterval(forceTimeout, 100);
+        // this.forceSend();
     }
 
     /**
@@ -60,31 +47,50 @@ export class CurlMultiTimer extends CurlMulti {
      */
     private setupCallbacks(): void {
         Logger.debug('setupCallbacks - setTimerCallback');
-        this.setTimerCallback((err, { timeoutMs }) => {
+        this.setTimerCallback((err, args) => {
             if (err) {
                 Logger.error(err)
                 return;
             }
-            if (timeoutMs == -1) {
+            if (args.timeoutMs == -1) {
                 this.timers.forEach((timer) => clearTimeout(timer));
                 this.timers = [];
+                this.checkProcess();
             } else {
                 this.timers.push(setTimeout(() => {
-                    Logger.debug('CurlMultiTimer - setTimerCallback - timeout', timeoutMs);
+                    Logger.debug('CurlMultiTimer - setTimerCallback - timeout', args.timeoutMs);
                     this.processData();
-                }, timeoutMs));
+                }, args.timeoutMs));
             }
         });
+    }
+    private isRunning=false;
+    private async waitResult() {
+        if(this.isRunning)return;
+        this.isRunning=true;
+        return await Promise.resolve().then(async () => {
+            do {
+                await this.wait(10000)
+                await this.processData();
+            } while (this.curls.size > 0)
+        })
     }
 
     private processData(): void {
         if (this.closed) return;
         try {
-            Logger.debug('CurlMultiTimer - perform - start');
+            // Logger.debug('CurlMultiTimer - perform - start');
             const runSize = this.perform();
-            Logger.debug('CurlMultiTimer - perform - end', runSize);
-            // 检查是否有完成的传输
-            this.curls.size > 0 && this.checkProcess();
+            if (runSize <= 0) {
+                // this.stopForceTimeout();
+                // Logger.error('CurlMultiTimer - perform', runSize);
+                if (this.curls.size > 0) {
+                    //可能需要全部失败
+                }
+                return;
+            } else {
+                this.checkProcess();
+            }
         } catch (error) {
             Logger.error('CurlMultiTimer - error', error);
             // console.log('执行 socket action 时出错:', error);
@@ -96,9 +102,9 @@ export class CurlMultiTimer extends CurlMulti {
         if (this.isCecker) return;
         try {
             while (true) {
-                Logger.debug(`CurlMultiTimer - checkProcess - infoRead start`);
+                // Logger.debug(`CurlMultiTimer - checkProcess - infoRead start`);
                 const msg = this.infoRead();
-                Logger.debug(`CurlMultiTimer - checkProcess - infoRead end`);
+                // Logger.debug(`CurlMultiTimer - checkProcess - infoRead end`);
                 if (!msg) {
                     break;
                 }
@@ -147,7 +153,7 @@ export class CurlMultiTimer extends CurlMulti {
             Logger.debug(`CurlMultiTimer - request - addHandle end`);
             // this.performSocketAction(CURL_SOCKET_TIMEOUT, 0);
             // 立即触发一次socket action来启动请求
-            this.startForceTimeout();
+            this.waitResult();
             setImmediate(() => {
                 if (!this.closed) {
                     this.processData();

@@ -41,8 +41,9 @@ export class CurlMultiEvent extends CurlMulti {
     constructor() {
         super();
         this.setupCallbacks();
-        this.startForceTimeout();
+        // this.startForceTimeout();
     }
+    
     private startForceTimeout(): void {
         if (this.forceTimeoutTimer) {
             clearInterval(this.forceTimeoutTimer);
