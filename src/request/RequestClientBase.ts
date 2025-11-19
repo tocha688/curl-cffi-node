@@ -82,7 +82,11 @@ export abstract class RequestClientBase extends BaseClient {
       }
     } finally {
       // 释放到池中以便后续复用
-      this.pool.release(curl);
+      if (options.keepAlive === false) {
+        this.pool.remove(curl);
+      } else {
+        this.pool.release(curl);
+      }
     }
   }
 

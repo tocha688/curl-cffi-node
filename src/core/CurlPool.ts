@@ -65,6 +65,16 @@ export class CurlPool {
     it.lastUsed = Date.now();
   }
 
+  remove(curl: Curl): void {
+    if (!curl.closed) {
+      curl.close();
+    }
+    const index = this.items.findIndex((x) => x.curl === curl);
+    if (index !== -1) {
+      this.items.splice(index, 1);
+    }
+  }
+
   private startPrune() {
     this.pruneTimer && clearInterval(this.pruneTimer);
     this.pruneTimer = setInterval(() => this.prune(), Math.min(this.idleTTL, 60_000));
