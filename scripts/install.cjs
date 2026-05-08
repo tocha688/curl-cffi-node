@@ -88,14 +88,21 @@ async function loadLibs() {
     const runtimeName = getDirName();
 
     // 获取所有 releases
-    const releases = await fetch(`https://api.github.com/repos/lexiforest/curl-impersonate/releases`, {
-        headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+    let releases = [];
+    try {
+        const resp = await fetch(`https://api.github.com/repos/lexiforest/curl-impersonate/releases`, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+            }
+        });
+        const data = await resp.json();
+        if (Array.isArray(data)) {
+            releases = data;
+        } else {
+            console.log(`GitHub API did not return an array (rate limit?), falling back to config version ${version}.`);
         }
-    }).then(x => x.json());
-
-    if (!Array.isArray(releases) || releases.length === 0) {
-        throw new Error("Failed to fetch releases from GitHub API.");
+    } catch (e) {
+        console.log(`Failed to fetch releases from GitHub API: ${e.message}, falling back to config version ${version}.`);
     }
 
     // 在 release 的 assets 中查找当前平台的包
@@ -121,8 +128,11 @@ async function loadLibs() {
         console.log(`Version ${release.tag_name} does not have a ${runtimeName} package, trying older version...`);
     }
 
-    if (!url || !actualVersion) {
-        throw new Error(`No release found with a ${runtimeName} package. Please check https://github.com/lexiforest/curl-impersonate/releases`);
+    // API 失败或未找到匹配包时，回退到配置版本直接构造下载 URL
+    if (!url) {
+        actualVersion = version;
+        url = `https://github.com/lexiforest/curl-impersonate/releases/download/${version}/libcurl-impersonate-${version}.${runtimeName}.tar.gz`;
+        console.log(`Falling back to config version, trying direct URL: ${url}`);
     }
 
     // 检查是否已下载过该版本
