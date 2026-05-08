@@ -32,7 +32,7 @@ export function getDirName() {
 export function getLibPath() {
     const name = getDirName();
     const libs: Record<string, string[]> = {
-        "win32": ["bin/libcurl.dll"],
+        "win32": ["bin/libcurl-impersonate.dll", "bin/libcurl.dll"],
         "darwin": ["libcurl-impersonate.4.dylib", "libcurl-impersonate.dylib"],
         "linux": ["libcurl-impersonate.so"],
     };
@@ -55,17 +55,16 @@ export function getLibPath() {
     if (preferredVersion) {
         const expectDir = `${name}_${preferredVersion}`; // 如 x86_64-win32_v1.1.2
         const hit = dirs.find(d => d.name === expectDir);
-        if (!hit) {
-            throw new Error(`Configured version='${preferredVersion}' in libcurl.config.json not found under ${globalLibsPath}. Please run scripts/install.cjs to download this version.`);
+        if (hit) {
+            for (const lib of candidates) {
+                const p = path.join(globalLibsPath, hit.name, lib);
+                if (fs.existsSync(p)) return p;
+            }
         }
-        for (const lib of candidates) {
-            const p = path.join(globalLibsPath, hit.name, lib);
-            if (fs.existsSync(p)) return p;
-        }
-        throw new Error(`Lib file not found in ${path.join(globalLibsPath, hit.name)} for platform ${os.platform()}.`);
+        // 如果配置版本目录不存在或其中没有找到 lib 文件，回退到扫描所有已安装版本
     }
 
-    // 若未配置版本，按版本降序选择最新
+    // 按版本降序选择最新的已安装版本
     function parseVer(s: string): number[] {
         const part = s.substring(s.indexOf("_") + 1).replace(/^v/i, "");
         return part.split(".").map(x => parseInt(x, 10) || 0);
