@@ -17,7 +17,7 @@ export function getGlobalRequest(): CurlRequestMulti | CurlRequest {
     return _req;
 }
 
-// 监听多个退出事件（避免在 'exit' 事件中做清理，部分平台可能阻塞退出）
+// 监听退出事件进行清理
 let cleaned = false;
 const cleanup = () => {
     if (cleaned) return;
@@ -33,8 +33,4 @@ const cleanup = () => {
     }
 };
 
-process.on("beforeExit", cleanup);
-// process.on("SIGINT", cleanup);
-// process.on("SIGTERM", cleanup);
-// process.on("uncaughtException", cleanup);
-// process.on("unhandledRejection", cleanup);
+process.on("exit", cleanup);

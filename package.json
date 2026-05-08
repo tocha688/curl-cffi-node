@@ -72,7 +72,8 @@
     "tough-cookie": "^5.1.2"
   },
   "ava": {
-    "timeout": "3m"
+    "timeout": "3m",
+    "workerThreads": false
   },
   "pnpm": {
     "onlyBuiltDependencies": [
