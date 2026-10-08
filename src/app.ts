@@ -32,7 +32,7 @@ export function getDirName() {
 export function getLibPath() {
     const name = getDirName();
     const libs: Record<string, string[]> = {
-        "win32": ["bin/libcurl-impersonate.dll", "bin/libcurl.dll"],
+        "win32": ["bin/libcurl-impersonate.dll", "bin/libcurl.dll", "lib/libcurl-impersonate.dll"],
         "darwin": ["libcurl-impersonate.4.dylib", "libcurl-impersonate.dylib"],
         "linux": ["libcurl-impersonate.so"],
     };
