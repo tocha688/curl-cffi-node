@@ -6,6 +6,7 @@ name: Node.js Package
 on:
   push:
     branches: [main, master]  # 监听主分支的推送
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
   build:
@@ -120,4 +121,3 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
